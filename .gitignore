@@ -1,3 +1,14 @@
+tests/
+benchmark/simpleqa_results_gpt4.1/
+benchmark/simpleqa_results_claude3.7/
+mnt/
+logs/
+tests/
+envs/.research.env
+envs/.dev.env
+envs/.prod.env
+develop-eggs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

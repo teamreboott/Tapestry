@@ -1,0 +1,19 @@
+models:
+  query_generator:
+    model_name: gpt-4.1-nano-2025-04-14
+    max_tokens: 1000
+  outline_generator:
+    model_name: gpt-4.1-nano-2025-04-14
+    max_tokens: 1000
+  answer_generator:
+    model_name: gemini/gemini-2.0-flash
+    max_tokens: 8000
+
+web_search:
+  engine: serper
+  num_output_per_query: 10
+  n_queries: 3
+
+db:
+  use_db_content: true
+  save_content_to_db: true

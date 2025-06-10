@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: auw_web_postgres_db
+    user: "999:999"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-webcrawldb}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - /mnt/nas/storage/webchat/dev/pg_db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-webcrawldb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fastapi_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auw_web_app
+    ports:
+      - "${APP_PORT:-9012}:9012"
+    volumes:
+      - ./logs:/app/logs
+      - /mnt/nas/storage/webchat/dev:/mnt/nas/storage/webchat/dev
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
