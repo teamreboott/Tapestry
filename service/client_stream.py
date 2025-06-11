@@ -58,7 +58,7 @@ def main(q: str, num_requests: int = 10):
 
 if __name__ == "__main__":
     start_time = time.time()
-    query = "부산 날씨 알려줘"
+    query = "서울 날씨 알려줘"
     main(query, 1)  # 10개의 동시 요청 실행
     end_time = time.time()
     print(f"실행 시간: {end_time - start_time}초")

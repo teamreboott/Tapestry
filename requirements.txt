@@ -1,18 +1,57 @@
-aiohttp==3.11.11
-anthropic==0.50.0
-beautifulsoup4==4.12.3
-fastapi==0.111.1
-fasttext==0.9.3
-gunicorn==22.0.0
+# 기본 라이브러리
 numpy==1.26.4
-openai==1.59.3
-python-dotenv==1.0.1
+certifi==2025.4.26
+pyyaml==6.0.2
+
+# 비동기 및 네트워크 관련
+aiohttp==3.11.11
+aiofiles==23.2.1
+httpx[http2]==0.27.2
+uvloop==0.21.0
+cloudscraper==1.2.71
+
+# 데이터베이스 관련
+psycopg2-binary==2.9.10
+asyncpg==0.30.0
+sqlalchemy==2.0.41
+
+# 웹 프레임워크 및 서버
+fastapi==0.111.1
 uvicorn==0.22.0
-youtube-transcript-api==0.6.3
-structlog==24.4.0
+gunicorn==22.0.0
+
+# AI/ML 관련
+openai==1.86.0
+anthropic==0.54.0
+fasttext==0.9.3
+litellm==1.71.3
+
+# 문서 및 텍스트 처리
+beautifulsoup4==4.12.3
 trafilatura==2.0.0
 markdownify==1.1.0
-pdfminer
-pdfminer.six
-pydantic-settings
-aiofiles==23.2.1
+pdfminer==20191125
+pdfminer.six==20250506
+PyMuPDF==1.25.5
+html2text==2025.4.15
+simhash==2.1.2
+
+# 데이터 처리
+pandas==2.2.3
+
+# 검색 엔진
+elasticsearch[async]==8.0.0
+
+# 웹 스크래핑 및 자동화
+selenium==4.33.0
+fake-useragent==2.2.0
+
+# 유틸리티 및 로깅
+python-dotenv==1.0.1
+structlog==24.4.0
+concurrent-log-handler==0.9.28
+rich==14.0.0
+pydantic-settings==2.9.1
+
+# 미디어 처리
+youtube-transcript-api==0.6.3
