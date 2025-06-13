@@ -6,7 +6,8 @@ from typing import List
 from rich.console import Console
 
 console = Console()
-SERVER_URL = "http://127.0.0.1:9012/websearch"
+# SERVER_URL = "http://127.0.0.1:9012/websearch"
+SERVER_URL = "http://127.0.0.1:32178/websearch"
 TIMEOUT = 180
 
 async def request_web_search(q: str, session_id: str, previous_messages: List[dict] = []):

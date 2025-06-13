@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tapestry-postgres
+spec:
+  serviceName: tapestry-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tapestry-postgres
+  template:
+    metadata:
+      labels:
+        app: tapestry-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        ports:
+        - containerPort: ${POSTGRES_PORT}
+        envFrom:
+        - secretRef:
+            name: tapestry-secrets
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      storageClassName: standard
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tapestry-postgres
+spec:
+  selector:
+    app: tapestry-postgres
+  ports:
+  - port: ${POSTGRES_PORT}
+    targetPort: ${POSTGRES_PORT}
+  clusterIP: None
+  type: ClusterIP 

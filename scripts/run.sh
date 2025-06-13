@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 기본값 설정
-ENV_FILE=${1:-./envs/.env}
+ENV_FILE=${1:-./envs/docker.env}
 
 # 환경 변수 파일 로드
 if [ -f "$ENV_FILE" ]; then

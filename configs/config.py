@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """
 
     APP_HOST: str = Field("0.0.0.0", env="APP_HOST")
-    APP_PORT: int = Field(9004, env="APP_PORT")
+    APP_PORT: int = Field(9012, env="APP_PORT")
     VENDOR: str = Field("openai", env="VENDOR")
     SEMAPHORE_LIMIT: int = Field(300, env="SEMAPHORE_LIMIT")
     DB_DIR: str = Field("mnt/nas/storage", env="DB_DIR")

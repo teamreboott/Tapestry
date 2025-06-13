@@ -4,7 +4,7 @@ services:
     container_name: auw_web_postgres_db
     user: "999:999"
     env_file:
-      - ${ENV_FILE:-./envs/.env}
+      - ${ENV_FILE:-./envs/docker.env}
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
@@ -30,7 +30,7 @@ services:
     volumes:
       - ${LOG_DIR:-./logs}:/app/logs
     env_file:
-      - ${ENV_FILE:-./envs/.env}
+      - ${ENV_FILE:-./envs/docker.env}
     depends_on:
       postgres:
         condition: service_healthy

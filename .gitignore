@@ -4,10 +4,8 @@ benchmark/simpleqa_results_claude3.7/
 mnt/
 logs/
 tests/
-envs/.research.env
-envs/.dev.env
-envs/.prod.env
-develop-eggs/
+envs/docker.env
+envs/k8s.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
