@@ -1,3 +1,33 @@
+# Persistent Volumes
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tapestry-logs-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  hostPath:
+    path: ${LOG_DIR}
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tapestry-postgres-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  hostPath:
+    path: ${POSTGRES_DATA_DIR}
+    type: DirectoryOrCreate
+---
+# PostgreSQL StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -34,6 +64,7 @@ spec:
         requests:
           storage: 10Gi
 ---
+# PostgreSQL Service
 apiVersion: v1
 kind: Service
 metadata:
