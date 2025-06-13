@@ -41,7 +41,7 @@ SyncSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_eng
 
 def create_pg_tables():
     try:
-        Base.metadata.create_all(bind=sync_engine)
+        Base.metadata.create_all(bind=sync_engine, checkfirst=True)
         logger.info("PostgreSQL tables created successfully (if they didn't exist).")
     except SQLAlchemyError as e:
         logger.error(f"Error creating PostgreSQL tables: {e}")
