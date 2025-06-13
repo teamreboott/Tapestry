@@ -1,44 +1,44 @@
-# ENV 예시
-
 # Environment Variable Guide
 
-이 프로젝트는 환경 변수 파일(.env)로 모든 설정을 관리합니다.
+All configuration for this project is managed via an environment variable file (`.env`). This approach allows for flexible and secure setup across different environments (local, Docker, Kubernetes).
 
-**중요:**
-- 반드시 `example.env` 파일을 복사해 `.env`로 만들어 사용하세요.
+---
 
-## 사용 방법
+## How to Use
 
-1. 템플릿 복사
-   ```bash
-   cp envs/example.env envs/.env
-   ```
-2. `.env` 파일을 열어 본인 환경에 맞게 수정하세요.
-   - API 키, DB 정보 등 필수 값 입력
-   - Docker/Kubernetes 환경에 따라 `POSTGRES_HOST` 등 일부 값만 다르게 설정
+1.  **Create a `.env` file:**  
+    Copy the provided template `example.env` to create your own configuration file named `.env` in the project root.
 
-3. 서비스 실행 시 `.env` 파일만 사용하면 됩니다.
-   - Docker Compose, Kubernetes, 로컬 모두 동일하게 `.env` 사용
+    ```bash
+    cp envs/example.env .env
+    ```
 
-## Docker/Kubernetes 환경 차이
-- `POSTGRES_HOST` 값만 다르게 설정하세요.
-  - Docker: `POSTGRES_HOST=postgres`
-  - Kubernetes: `POSTGRES_HOST=tapestry-postgres`
-- 기타 변수는 동일하게 사용 가능합니다.
+2.  **Edit Your `.env` File:**  
+    Open the `.env` file and populate it with your specific settings, such as API keys, database credentials, and host paths.
 
-## 예시 템플릿
-- 모든 변수와 설명은 `example.env` 파일을 참고하세요.
+    > **Note:** For a detailed description of each variable, please refer to the comments inside the `envs/example.env` file.
 
-MODEL_NAME=gpt-4.1-2025-04-14
-SUB_MODEL_NAME=claude-3-7-sonnet-latest
-MAX_TOKENS=1000
-APP_HOST=0.0.0.0
-APP_PORT=9004
-VENDOR=openai
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-SERPER_API_KEY=
-NAVER_CLIENT_ID=
-NAVER_CLIENT_SECRET=
-SLACK_WEBHOOK_URL=
-```
+---
+
+## Environment-Specific Configuration
+
+While most variables are universal, a few require specific values depending on whether you are running the service with Docker or Kubernetes.
+
+### `POSTGRES_HOST`
+This variable defines the network hostname for the PostgreSQL database service.
+-   **For Docker:** Set it to the name of the service defined in `docker-compose.yaml`.
+    ```
+    POSTGRES_HOST=postgres
+    ```
+-   **For Kubernetes:** Set it to the name of the Kubernetes service for PostgreSQL.
+    ```
+    POSTGRES_HOST=tapestry-postgres
+    ```
+
+### `LOG_DIR` and `POSTGRES_DATA_DIR`
+These variables define the host paths for storing logs and database data.
+-   **For Docker:** These can be relative or absolute paths on the host machine.
+-   **For Kubernetes:** These **must be absolute paths** that exist on the Kubernetes nodes, as they are used for `hostPath` PersistentVolumes.
+    -   Example: `/mnt/nas/storage/tapestry/logs`
+
+All scripts (`run.sh`, `run_k8s.sh`) are designed to automatically load the `.env` file from the project root. 

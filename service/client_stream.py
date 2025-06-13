@@ -6,8 +6,20 @@ from typing import List
 from rich.console import Console
 
 console = Console()
-# SERVER_URL = "http://127.0.0.1:9012/websearch"
-SERVER_URL = "http://127.0.0.1:30800/websearch"
+
+# --- Server URL Configuration ---
+# Select the appropriate URL based on your environment.
+
+# 1. For Docker deployment (or local development)
+#    - The service runs directly on the host machine or in a Docker container.
+#    - The port is mapped directly. Default is 9012.
+SERVER_URL = "http://127.0.0.1:9012/websearch"
+
+# 2. For Kubernetes deployment
+#    - The service is accessed via a NodePort.
+#    - The default NodePort is 30800.
+# SERVER_URL = "http://127.0.0.1:30800/websearch"
+
 TIMEOUT = 180
 
 async def request_web_search(q: str, session_id: str, previous_messages: List[dict] = []):
