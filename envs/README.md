@@ -1,5 +1,7 @@
 # Environment Variable Guide
 
+English | [한국어](README.ko.md)
+
 All configuration for this project is managed via an environment variable file (`.env`). This approach allows for flexible and secure setup across different environments (local, Docker, Kubernetes).
 
 ---
@@ -7,11 +9,13 @@ All configuration for this project is managed via an environment variable file (
 ## How to Use
 
 1.  **Create a `.env` file:**  
-    Copy the provided template `example.env` to create your own configuration file named `.env` in the project root.
+    Copy the provided template `example.env` to create your own configuration file named `.env` in the `envs` directory.
 
     ```bash
-    cp envs/example.env .env
+    cp envs/example.env envs/.env
     ```
+
+    > **Important**: The `.env` file must be located in the `envs` directory. The run scripts look for the configuration file in this location.
 
 2.  **Edit Your `.env` File:**  
     Open the `.env` file and populate it with your specific settings, such as API keys, database credentials, and host paths.
@@ -40,5 +44,3 @@ These variables define the host paths for storing logs and database data.
 -   **For Docker:** These can be relative or absolute paths on the host machine.
 -   **For Kubernetes:** These **must be absolute paths** that exist on the Kubernetes nodes, as they are used for `hostPath` PersistentVolumes.
     -   Example: `/mnt/nas/storage/tapestry/logs`
-
-All scripts (`run.sh`, `run_k8s.sh`) are designed to automatically load the `.env` file from the project root. 

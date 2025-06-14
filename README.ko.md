@@ -1,6 +1,6 @@
 # Tapestry
 
-[English](README.md) | [한국어](README.ko.md)
+[English](README.md) | 한국어
 
 웹 검색 기반 LLM QA 시스템으로, CIKM 2025 데모 트랙을 위해 설계되었습니다.
 
@@ -12,19 +12,19 @@
 
 ### 1. 사전 요구사항: 환경 설정
 
-서비스를 시작하기 전에 환경 변수를 구성해야 합니다. 모든 설정은 프로젝트 루트의 `.env` 파일을 통해 관리됩니다.
+서비스를 시작하기 전에 환경 변수를 구성해야 합니다. 모든 설정은 `envs` 디렉토리의 `.env` 파일을 통해 관리됩니다.
 
 1.  **예제 설정 복사:**  
     제공된 템플릿을 복사하여 환경 파일을 생성합니다.
 
     ```bash
-    cp envs/example.env .env
+    cp envs/example.env envs/.env
     ```
 
 2.  **`.env` 파일 편집:**  
     새로 생성된 `.env` 파일을 열고 API 키와 데이터베이스 자격 증명과 같은 필수 값을 입력합니다.
 
-    -   각 변수에 대한 자세한 설명은 [`envs/README.md`](envs/README.md) 가이드를 참조하세요.
+    -   각 변수에 대한 자세한 설명은 [`envs/README.ko.md`](envs/README.ko.md) 가이드를 참조하세요.
     -   **중요**: `POSTGRES_HOST` 변수는 배포 환경에 맞게 올바르게 설정되어야 합니다:
         -   **Docker**: `POSTGRES_HOST=postgres`
         -   **Kubernetes**: `POSTGRES_HOST=tapestry-postgres`

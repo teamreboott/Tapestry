@@ -1,6 +1,6 @@
 # Tapestry
 
-[English](README.md) | [한국어](README.ko.md)
+English | [한국어](README.ko.md)
 
 A web search-based LLM QA system, designed for the CIKM 2025 demo track.
 
@@ -12,13 +12,13 @@ This guide provides instructions for running the Tapestry service using Docker o
 
 ### 1. Prerequisites: Environment Configuration
 
-Before launching the service, you must configure your environment variables. All settings are managed through a `.env` file in the project root.
+Before launching the service, you must configure your environment variables. All settings are managed through a `.env` file in the `envs` directory.
 
 1.  **Copy the Example Configuration:**  
     Create your environment file by copying the provided template.
 
     ```bash
-    cp envs/example.env .env
+    cp envs/example.env envs/.env
     ```
 
 2.  **Edit the `.env` File:**  
