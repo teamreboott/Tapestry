@@ -1,5 +1,7 @@
 # Tapestry
 
+[English](README.md) | [한국어](README.ko.md)
+
 A web search-based LLM QA system, designed for the CIKM 2025 demo track.
 
 ---
