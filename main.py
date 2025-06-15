@@ -19,7 +19,7 @@ from src.models.model_list import get_llm_info
 from src.utils.common import is_url, extract_urls, load_yaml, json_line
 from src.utils.logging import configure_logging
 from rich.console import Console
-from src.search.serper import SerperClientAsync
+from src.search.engines import load_search_engine
 from src.search.crawl import Crawler
 from configs.config import Settings
 from src.types.language import Language
@@ -46,9 +46,10 @@ QUERY_REWRITE_MODEL_NAME: str = config['models']['query_generator']['model_name'
 OUTLINE_GENERATOR_MODEL_NAME: str = config['models']['outline_generator']['model_name']
 ANSWER_GENERATOR_MODEL_NAME: str = config['models']['answer_generator']['model_name']
 
-QUERY_REWRITE_MODEL_INFO = get_llm_info(QUERY_REWRITE_MODEL_NAME)
-OUTLINE_GENERATOR_MODEL_INFO = get_llm_info(OUTLINE_GENERATOR_MODEL_NAME)
-ANSWER_GENERATOR_MODEL_INFO = get_llm_info(ANSWER_GENERATOR_MODEL_NAME)
+TOTAL_MODEL_USAGE = {}
+for model_name in [QUERY_REWRITE_MODEL_NAME, OUTLINE_GENERATOR_MODEL_NAME, ANSWER_GENERATOR_MODEL_NAME]:
+    TOTAL_MODEL_USAGE[model_name] = {"model": {"model_vendor": get_llm_info(model_name)['vendor'], "model_type": get_llm_info(model_name)['model_type'], "model_name": model_name}, "usage": {"input_token_count": 0, "output_token_count": 0}}
+
 configure_logging(LOG_FILE)
 logger = structlog.get_logger()
 
@@ -64,8 +65,12 @@ answer_generator = AnswerGenerator(model=ANSWER_GENERATOR_MODEL_NAME, max_tokens
 
 async def lifespan(app: FastAPI):
     logger.info("Application startup...")
+
     # TODO: Alembic (migration)
-    create_pg_tables()
+
+    # Create (or reuse) PostgreSQL tables if use_db_content is True
+    if config['db']['use_db_content']:
+        create_pg_tables()
     yield
 
 
@@ -128,16 +133,17 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
     outline_prompt_usage = outline_completion_usage = outline_total_usage = 0
     answer_prompt_usage = answer_completion_usage = answer_total_usage = 0
 
-    # 2) Initialize SerperClientAsync
-    serper_client = SerperClientAsync(browser_client=browser_client, 
-                                      api_key=settings.SERPER_API_KEY, 
-                                      num_output_per_query=10, 
-                                      content_type_timeout=1.0,
-                                      use_youtube_transcript=use_youtube_transcript,
-                                      top_k=top_k)
+    # 2) Initialize Web Engine Client
+    web_engine_client = load_search_engine(engine_name=config['web_search']['engine'],
+                                           browser_client=browser_client,
+                                           num_output_per_query=config['web_search']['num_output_per_query'],
+                                           content_type_timeout=config['web_search']['content_type_timeout'],
+                                           use_youtube_transcript=use_youtube_transcript,
+                                           top_k=top_k,
+                                           exclude_domain=config['exclude_domain'])
 
     # 3) Initialize Crawler
-    crawler = Crawler(browser_client=browser_client, max_content_length=20000)
+    crawler = Crawler(browser_client=browser_client, use_db_content=config['db']['use_db_content'], max_content_length=20000)
 
     if return_process:
         yield json_line({"status": "processing", "message": {"title": "질문 분석 중..."}})
@@ -164,9 +170,8 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             use_search_engine = True
             response = await query_rewriter.get_response([{"role": "user", "content": prompt}])
 
-            query_rewrite_prompt_usage += response.get("prompt_usage", 0)
-            query_rewrite_completion_usage += response.get("completion_usage", 0)
-            query_rewrite_total_usage += response.get("total_usage", 0)
+            TOTAL_MODEL_USAGE[QUERY_REWRITE_MODEL_NAME]['usage']['input_token_count'] += response.get("prompt_usage", 0)
+            TOTAL_MODEL_USAGE[QUERY_REWRITE_MODEL_NAME]['usage']['output_token_count'] += response.get("completion_usage", 0)
             total_answers = response.get("answer", [])
 
             if len(total_answers) != 0:
@@ -183,10 +188,8 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         if return_process:
             yield json_line({"status": "processing", "message": {"title": "관련 질문 검색 중..."}})
 
-        serper_credits = int(2 * len(query_list))
-
         if use_search_engine:
-            scraped_sources = await serper_client.multiple_search(query_list)
+            scraped_sources = await web_engine_client.multiple_search(query_list)
             total_results = len(scraped_sources)
         else:
             scraped_sources = [{
@@ -200,7 +203,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
                 "pdf_url": "",
             }]
             total_results = 1
-            serper_credits = 0
 
         if total_results == 0:
             logger.error("no_results", query=query, message="웹 검색 결과가 없습니다.")
@@ -247,9 +249,8 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             outline_results = await get_outlines(outline_prompt)
             outlines = outline_results.get("outlines", [])
 
-        outline_prompt_usage += outline_results.get("prompt_usage", 0)
-        outline_completion_usage += outline_results.get("completion_usage", 0)
-        outline_total_usage += outline_results.get("total_usage", 0)
+        TOTAL_MODEL_USAGE[OUTLINE_GENERATOR_MODEL_NAME]['usage']['input_token_count'] += outline_results.get("prompt_usage", 0)
+        TOTAL_MODEL_USAGE[OUTLINE_GENERATOR_MODEL_NAME]['usage']['output_token_count'] += outline_results.get("completion_usage", 0)
 
         outlines = outline_results.get("outlines", [])
 
@@ -313,17 +314,18 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             )
             answer_prompt_usage = answer_response_dict.get("prompt_usage", 0)
             answer_completion_usage = answer_response_dict.get("completion_usage", 0)
+            TOTAL_MODEL_USAGE[ANSWER_GENERATOR_MODEL_NAME]['usage']['input_token_count'] += answer_prompt_usage
+            TOTAL_MODEL_USAGE[ANSWER_GENERATOR_MODEL_NAME]['usage']['output_token_count'] += answer_completion_usage
             answer_content_for_summary = answer_response_dict.get("answer", "")
 
         metadata = {
             "queries": [q["query"] for q in query_list],
-            # "candidate_references": web_contents,
             "sub_titles": outlines,
         }
 
-        # save_path = os.path.join(save_dir, f"{chat_index}.json")
-        # async with aiofiles.open(save_path, "w", encoding="utf-8") as f:
-        #     await f.write(json.dumps(search_info, ensure_ascii=False, indent=4))
+        usages = []
+        for k, v in TOTAL_MODEL_USAGE.items():
+            usages.append(v)
 
         # 5) 최종 요약
         summary = {
@@ -331,58 +333,25 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             "message": {
                 "content": answer_content_for_summary,
                 "metadata": metadata,
-                "models": [
-                    {
-                        "model": {
-                            "model_vendor": QUERY_REWRITE_MODEL_INFO['vendor'],
-                            "model_type": QUERY_REWRITE_MODEL_INFO['model_type'],
-                            "model_name": QUERY_REWRITE_MODEL_NAME,
-                        },
-                        "usage": {
-                            "input_token_count": query_rewrite_prompt_usage,
-                            "output_token_count": query_rewrite_completion_usage,
-                        },
-                    },
-                    {
-                        "model": {
-                            "model_vendor": OUTLINE_GENERATOR_MODEL_INFO['vendor'],
-                            "model_type": OUTLINE_GENERATOR_MODEL_INFO['model_type'],
-                            "model_name": OUTLINE_GENERATOR_MODEL_NAME,
-                        },
-                        "usage": {
-                            "input_token_count": outline_prompt_usage,
-                            "output_token_count": outline_completion_usage,
-                        },
-                    },
-                    {
-                        "model": {
-                            "model_vendor": "serper",
-                            "model_type": "serper",
-                            "model_name": "serper",
-                        },
-                        "usage": {
-                            "input_token_count": serper_credits,
-                            "output_token_count": 0,
-                        },
-                    },
-                ],
+                "models": usages,
             },
         }
         yield json_line(summary)
 
         # save web contents to database
-        for web_content in web_contents:
-            db_payload = {
-                "url": web_content.get("url"),
-                "title": web_content.get("title"),
-                "snippet": web_content.get("snippet"),
-                "content": web_content.get("content"),
-                "date": web_content.get("date"),
-                "language": web_content.get("language"),
-                "type": web_content.get("type"),
-            }
-            db_payload_cleaned = {k: v for k, v in db_payload.items() if v is not None}
-            await save_document_to_pg(db_payload_cleaned)
+        if config['db']['save_content_to_db']:
+            for web_content in web_contents:
+                db_payload = {
+                    "url": web_content.get("url"),
+                    "title": web_content.get("title"),
+                    "snippet": web_content.get("snippet"),
+                    "content": web_content.get("content"),
+                    "date": web_content.get("date"),
+                    "language": web_content.get("language"),
+                    "type": web_content.get("type"),
+                }
+                db_payload_cleaned = {k: v for k, v in db_payload.items() if v is not None}
+                await save_document_to_pg(db_payload_cleaned)
 
     except asyncio.TimeoutError as exc:
         logger.error("timeout", error=str(exc))
