@@ -7,7 +7,9 @@
   English | <a href="README.ko.md">한국어</a>
 </p>
 
-Tapestry : Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
+<p align="center">
+Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
+</p>
 
 ---
 
