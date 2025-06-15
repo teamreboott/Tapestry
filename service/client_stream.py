@@ -4,6 +4,7 @@ import json
 import time
 from typing import List
 from rich.console import Console
+import argparse
 
 console = Console()
 
@@ -22,17 +23,44 @@ SERVER_URL = "http://127.0.0.1:9012/websearch"
 
 TIMEOUT = 180
 
-async def request_web_search(q: str, session_id: str, previous_messages: List[dict] = []):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Web search client stream")
+    parser.add_argument('--language', type=str, default='en', help='검색 언어')
+    parser.add_argument('--query', type=str, required=True, help='검색 쿼리')
+    parser.add_argument('--persona_prompt', type=str, default='N/A', help='페르소나 프롬프트')
+    parser.add_argument('--custom_prompt', type=str, default='N/A', help='커스텀 프롬프트')
+    parser.add_argument('--target_nuance', type=str, default='Natural', help='목표 뉘앙스')
+    parser.add_argument('--stream', action='store_true', help='스트리밍 사용 여부')
+    parser.add_argument('--no-stream', dest='stream', action='store_false', help='스트리밍 미사용')
+    parser.set_defaults(stream=True)
+    parser.add_argument('--use_youtube_transcript', action='store_true', help='유튜브 트랜스크립트 사용 여부')
+    parser.add_argument('--no-youtube', dest='use_youtube_transcript', action='store_false', help='유튜브 트랜스크립트 미사용')
+    parser.set_defaults(use_youtube_transcript=False)
+    parser.add_argument('--top_k', type=int, default=None, help='top_k 값')
+    parser.add_argument('--num_requests', type=int, default=1, help='동시 요청 개수')
+    return parser.parse_args()
+
+async def request_web_search(
+        q: str, 
+        session_id: str, 
+        previous_messages: List[dict] = [], 
+        language: str = 'en', 
+        persona_prompt: str = 'N/A', 
+        custom_prompt: str = 'N/A', 
+        target_nuance: str = 'Natural', 
+        stream: bool = True, 
+        use_youtube_transcript: bool = False, 
+        top_k: int = None):
     payload = {
-        "language": "en",
+        "language": language,
         "query": q,
-        "persona_prompt": "N/A",
-        "custom_prompt": "N/A",
-        "target_nuance": "Natural",
+        "persona_prompt": persona_prompt,
+        "custom_prompt": custom_prompt,
+        "target_nuance": target_nuance,
         "messages": previous_messages,
-        "stream": True,
-        "use_youtube_transcript": False,
-        "top_k": None
+        "stream": stream,
+        "use_youtube_transcript": use_youtube_transcript,
+        "top_k": top_k
     }
     url = SERVER_URL
     async with aiohttp.ClientSession() as session:
@@ -52,26 +80,36 @@ async def request_web_search(q: str, session_id: str, previous_messages: List[di
                         console.print(f"[red]Session {session_id}: {data_json}")
                         break
                     elif data_json["status"] == "streaming":
-                        console.print(f"[green]Session {session_id}: {data_json}")
+                        delta = data_json['delta']['content']
+                        console.print(f"[green]{delta}")
                     elif data_json["status"] == "complete":
-                        console.print(f"[green]Session {session_id}: {data_json}")
+                        console.print(f"[yellow bold]Session {session_id}: {data_json}")
                         break
 
-async def run_concurrent_requests(query: str, num_requests: int = 10):
+async def run_concurrent_requests(query: str, num_requests: int = 10, language: str = 'en', persona_prompt: str = 'N/A', custom_prompt: str = 'N/A', target_nuance: str = 'Natural', stream: bool = True, use_youtube_transcript: bool = False, top_k: int = None):
     tasks = []
     for i in range(num_requests):
         session_id = f"session_{i:03d}"
-        task = request_web_search(query, session_id, [])
+        task = request_web_search(query, session_id, [], language, persona_prompt, custom_prompt, target_nuance, stream, use_youtube_transcript, top_k)
         tasks.append(task)
-    
     await asyncio.gather(*tasks)
 
-def main(q: str, num_requests: int = 10):
-    asyncio.run(run_concurrent_requests(q, num_requests))
+def main(args):
+    asyncio.run(run_concurrent_requests(
+        args.query,
+        args.num_requests,
+        args.language,
+        args.persona_prompt,
+        args.custom_prompt,
+        args.target_nuance,
+        args.stream,
+        args.use_youtube_transcript,
+        args.top_k
+    ))
 
 if __name__ == "__main__":
     start_time = time.time()
-    query = "서울 날씨 알려줘"
-    main(query, 1)  # 10개의 동시 요청 실행
+    args = parse_args()
+    main(args)
     end_time = time.time()
-    print(f"실행 시간: {end_time - start_time}초")
+    print(f"Duration: {end_time - start_time}초")

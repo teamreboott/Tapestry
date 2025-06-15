@@ -129,8 +129,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
     target_language_name = Language.from_code(language).query_params["name"]
     reference_label = Language.from_code(language).query_params["source_tag"]
 
-    query_rewrite_prompt_usage = query_rewrite_completion_usage = query_rewrite_total_usage = 0
-    outline_prompt_usage = outline_completion_usage = outline_total_usage = 0
     answer_prompt_usage = answer_completion_usage = answer_total_usage = 0
 
     # 2) Initialize Web Engine Client
@@ -146,7 +144,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
     crawler = Crawler(browser_client=browser_client, use_db_content=config['db']['use_db_content'], max_content_length=20000)
 
     if return_process:
-        yield json_line({"status": "processing", "message": {"title": "질문 분석 중..."}})
+        yield json_line({"status": "processing", "message": {"title": "Analyzing the question..."}})
 
     try:
         query_list = []
@@ -182,11 +180,11 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
                 query_list.append({"query": url, "type": "Search", "language": "ko"})
 
         if len(query_list) == 0:
-            yield json_line({"status": "failure", "data": {"title": "질문을 이해하지 못했습니다."}})
+            yield json_line({"status": "failure", "data": {"title": "I couldn't understand the question."}})
             return
 
         if return_process:
-            yield json_line({"status": "processing", "message": {"title": "관련 질문 검색 중..."}})
+            yield json_line({"status": "processing", "message": {"title": "Searching for related questions..."}})
 
         if use_search_engine:
             scraped_sources = await web_engine_client.multiple_search(query_list)
@@ -205,8 +203,8 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             total_results = 1
 
         if total_results == 0:
-            logger.error("no_results", query=query, message="웹 검색 결과가 없습니다.")
-            yield json_line({"status": "failure", "message": {"title": "웹 검색 결과가 없습니다."}})
+            logger.error("no_results", query=query, message="No web search results found.")
+            yield json_line({"status": "failure", "message": {"title": "No web search results found."}})
             return
 
         merged_query = " ".join([q["query"] for q in query_list])
@@ -217,7 +215,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             merged_content += f"{title}: {snippet}\n"
 
         if return_process:
-            yield json_line({"status": "processing", "message": {"title": f"{total_results}개의 검색 결과를 살펴보는 중..."}})
+            yield json_line({"status": "processing", "message": {"title": f"Searching {total_results} search results..."}})
 
         # 소제목 생성과 웹 콘텐츠 스크래핑을 병렬로 실행
         async def get_outlines(outline_prompt):
@@ -259,7 +257,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         console.print(f"[pink bold]Processing time: {execution_time:.2f} seconds")
 
         if return_process:
-            yield json_line({"status": "processing", "message": {"title": "웹 검색 완료"}})
+            yield json_line({"status": "processing", "message": {"title": "Web search completed"}})
 
         answer_content_for_summary = ""
         today_date = date_str
@@ -355,10 +353,10 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
 
     except asyncio.TimeoutError as exc:
         logger.error("timeout", error=str(exc))
-        yield json_line({"status": "failure", "message": {"title": "웹 검색 시간 초과"}})
+        yield json_line({"status": "failure", "message": {"title": "Web search timeout"}})
     except Exception as exc:  # noqa: BLE001
         logger.error("stream_error", error=str(exc))
-        yield json_line({"status": "failure", "message": {"title": "웹 검색 실패"}})
+        yield json_line({"status": "failure", "message": {"title": "Web search failed"}})
     finally:
         await browser_client.aclose()
 

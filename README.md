@@ -39,7 +39,7 @@ TDB
 
 ## 🔍 Preview
 
-[🎥 preview](misc/preview.mov)
+![데모](misc/preview.gif)
 
 ---
 
