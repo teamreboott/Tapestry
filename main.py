@@ -7,6 +7,8 @@ import structlog
 import uvicorn
 import uvloop
 import time
+from enum import Enum
+from pydantic import field_validator
 from typing import AsyncGenerator
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -77,9 +79,19 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Web Search API", version="0.1.0", lifespan=lifespan)
 semaphore = asyncio.Semaphore(settings.SEMAPHORE_LIMIT)
 
+
+class SearchType(str, Enum):
+    auto = "auto"
+    general = "general"
+    scholar = "scholar"
+    news = "news"
+    youtube = "youtube"
+
+
 class Query(BaseModel):
     query: str
     language: str
+    search_type: SearchType = SearchType.auto
     messages: list[dict] | None = []
     persona_prompt: str | None = "N/A"
     custom_prompt: str | None = "N/A"
@@ -87,7 +99,15 @@ class Query(BaseModel):
     return_process: bool = True
     stream: bool = False
     use_youtube_transcript: bool = False
-    top_k: int | None = "auto"
+    top_k: int | str = "auto"
+
+    @field_validator("top_k", mode="before")
+    def validate_top_k(cls, v):
+        if v is None or v == "auto":
+            return "auto"
+        if isinstance(v, int):
+            return v
+        raise ValueError("top_k는 정수 또는 'auto'만 허용됩니다.")
 
 
 @app.exception_handler(Exception)
@@ -118,6 +138,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         history_messages = history_messages[-4:]
     query = payload.query.replace('\n', ' ').replace('\t', ' ').strip()
     language = payload.language
+    search_type = payload.search_type
     persona_prompt = payload.persona_prompt
     custom_prompt = payload.custom_prompt
     target_nuance = payload.target_nuance

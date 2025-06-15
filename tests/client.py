@@ -27,6 +27,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Web search client stream")
     parser.add_argument('--language', type=str, default='en', help='검색 언어')
     parser.add_argument('--query', type=str, required=True, help='검색 쿼리')
+    parser.add_argument('--search_type', type=str, default='auto', help='검색 타입')
     parser.add_argument('--persona_prompt', type=str, default='N/A', help='페르소나 프롬프트')
     parser.add_argument('--custom_prompt', type=str, default='N/A', help='커스텀 프롬프트')
     parser.add_argument('--target_nuance', type=str, default='Natural', help='목표 뉘앙스')
@@ -43,6 +44,7 @@ def parse_args():
 async def request_web_search(
         q: str, 
         session_id: str, 
+        search_type: str = 'auto',
         previous_messages: List[dict] = [], 
         language: str = 'en', 
         persona_prompt: str = 'N/A', 
@@ -54,6 +56,7 @@ async def request_web_search(
     payload = {
         "language": language,
         "query": q,
+        "search_type": search_type,
         "persona_prompt": persona_prompt,
         "custom_prompt": custom_prompt,
         "target_nuance": target_nuance,
@@ -86,11 +89,11 @@ async def request_web_search(
                         console.print(f"[yellow bold]Session {session_id}: {data_json}")
                         break
 
-async def run_concurrent_requests(query: str, num_requests: int = 10, language: str = 'en', persona_prompt: str = 'N/A', custom_prompt: str = 'N/A', target_nuance: str = 'Natural', stream: bool = True, use_youtube_transcript: bool = False, top_k: int = None):
+async def run_concurrent_requests(query: str, num_requests: int = 10, language: str = 'en', search_type: str = 'auto', persona_prompt: str = 'N/A', custom_prompt: str = 'N/A', target_nuance: str = 'Natural', stream: bool = True, use_youtube_transcript: bool = False, top_k: int = None):
     tasks = []
     for i in range(num_requests):
         session_id = f"session_{i:03d}"
-        task = request_web_search(query, session_id, [], language, persona_prompt, custom_prompt, target_nuance, stream, use_youtube_transcript, top_k)
+        task = request_web_search(query, session_id, search_type, [], language, persona_prompt, custom_prompt, target_nuance, stream, use_youtube_transcript, top_k)
         tasks.append(task)
     await asyncio.gather(*tasks)
 
@@ -99,6 +102,7 @@ def main(args):
         args.query,
         args.num_requests,
         args.language,
+        args.search_type,
         args.persona_prompt,
         args.custom_prompt,
         args.target_nuance,
