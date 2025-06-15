@@ -8,12 +8,12 @@
 </p>
 
 <p align="center">
-Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
+🌐 Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
 </p>
 
 ---
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents
 
 - [Overview](#-overview)
 - [Support](#-support)
@@ -32,7 +32,7 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
 
 ## 📖 Overview
 
-**TDB**
+`Tapestry` is an open-source backend framework designed to build customizable AI web search pipelines. Tapestry allows developers to flexibly combine **plug-and-play modules** for search categories, domain-specific crawling, LLMs, and algorithms for improving search performance (e.g., deduplication, query rewriting).
 
 ![데모](misc/preview.gif)
 
@@ -134,17 +134,12 @@ TDB
 
 You can test the streaming API using the provided client script.
 
-1.  **Navigate to the service directory:**
+1.  **Run the client:**
     ```bash
-    cd service/
+    python service/client_stream.py
     ```
 
-2.  **Run the client:**
-    ```bash
-    python client_stream.py
-    ```
-
-3.  **Configure the Endpoint:**  
+2.  **Configure the Endpoint:**  
     Before running, open `service/client_stream.py` and ensure the `SERVER_URL` variable points to the correct endpoint for your environment:
     -   **Docker:** `http://127.0.0.1:9012/websearch`
     -   **Kubernetes:** `http://127.0.0.1:30800/websearch` (or your `K8S_IP` and `NODE_PORT`).
