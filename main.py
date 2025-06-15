@@ -296,7 +296,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
                                                         sub_titles=sub_titles, 
                                                         prompt_web_search=prompt_web_search)
         if num_history_messages > 0:
-            messages = history_messages.extend([{"role": "user", "content": answer_prompt}])
+            messages = history_messages + [{"role": "user", "content": answer_prompt}]
         else:
             messages = [{"role": "user", "content": answer_prompt}]
 
