@@ -73,11 +73,7 @@ async def request_web_search(
                 data_str = line.decode("utf-8").strip()
                 if data_str:
                     data_json = json.loads(data_str)
-                    if data_json["status"] == "success":
-                        console.print(f"[green]Session {session_id}: Success")
-                        console.print_json(f"{json.dumps(data_json)}")
-                        break
-                    elif data_json["status"] in "processing":
+                    if data_json["status"] in "processing":
                         console.print(f"[blue]Session {session_id}: {data_json}")
                     elif data_json["status"] == "failure":
                         console.print(f"[red]Session {session_id}: {data_json}")

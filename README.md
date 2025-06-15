@@ -128,14 +128,14 @@ For deployment in a Kubernetes cluster.
 
 `POST /websearch`
 
-#### Request body (variable | type | required)
+#### Request body
 
 * `query` | `string` | **Required**: The search query string.
 
-* `language` | `string` | Optional, defaults to `"en"`: ISO 639-1 two-letter language code (e.g., en, ko, ja).
+* `language` | `string` | Optional, defaults to `"en"`: Response language. ISO 639-1 two-letter language code (e.g., en, ko, ja).
 
 * `search_type` | `string` | Optional, defaults to `"auto"`: 
-    - `auto`: The LLM automatically infers the search type from the query and selects the appropriate search engine.
+    - `auto`: The LLM automatically infers the search type from the query.
     - `general`: Uses only indexed content from general search results for answering.
     - `news`: Uses only indexed content from news search results for answering.
     - `scholar`: Uses only indexed content from scholarly search results for answering. If the search engine does not support this, it falls back to `general` search.
@@ -156,15 +156,59 @@ For deployment in a Kubernetes cluster.
 * `stream` | `bool` | Optional, defaults to `True`: Return the response as a streaming output.
 
 
+#### Response
+
+The API returns a streaming JSON response with the following status types:
+
+- `processing`: Indicates the current processing step.
+- `streaming`: Returns incremental answer tokens as they are generated (if `stream=true`).
+- `complete`: Final answer and metadata.
+
+##### Example Responses
+
+- **Processing**
+
+```json
+{"status": "processing", "message": {"title": "Web search completed"}}
+```
+
+- **Streaming**
+
+```json
+{"status": "streaming", "delta": {"content": "token_text"}}
+```
+
+- **Complete**
+
+```json
+{
+  "status": "complete",
+  "message": {
+    "content": "<final_answer_string>",
+    "metadata": {
+      "queries": ["<query1>", "<query2>", ...],
+      "sub_titles": ["<subtitle1>", "<subtitle2>", ...]
+    },
+    "models": [
+        {
+            "model": {"model_name": "<model_name>", "model_vendor": "<model_vendor>", "model_type": "<model_type>"},
+            "usage": {"input_token_count": 0, "output_token_count": 0}
+        },
+      ...
+    ]
+  }
+}
+```
+
 ---
 
 ## 🧪 Client Tests
 
-You can test the streaming API using the provided client script.
+You can test the API using the provided client script.
 
 1.  **Run the client:**
     ```bash
-    python tests/client.py
+    python tests/client.py --query "what is an ai search engine?"
     ```
 
 2.  **Configure the Endpoint:**  
