@@ -12,52 +12,33 @@ EXCLUDE_DOMAIN = [
     "facebook.com", "instagram.com", "twitter.com", "tiktok.com",
 ]
 
-SERPER_SEARCH_URL = "https://google.serper.dev/search"
-SERPER_IMAGES_URL = "https://google.serper.dev/images"
-SERPER_VIDEOS_URL = "https://google.serper.dev/videos"
-SERPER_PLACES_URL = "https://google.serper.dev/places"
-SERPER_NEWS_URL = "https://google.serper.dev/news"
-SERPER_SHOPPING_URL = "https://google.serper.dev/shopping"
-SERPER_SCHOLAR_URL = "https://google.serper.dev/scholar"
-SEARCH_CATEGORY = {
-    "Search": SERPER_SEARCH_URL,
-    "Images": SERPER_IMAGES_URL,
-    "Videos": SERPER_VIDEOS_URL,
-    "Places": SERPER_PLACES_URL,
-    "News": SERPER_NEWS_URL,
-    "Shopping": SERPER_SHOPPING_URL,
-    "Scholar": SERPER_SCHOLAR_URL,
-}
+SERP_URL = "https://serpapi.com/search"
 # =============================
-# SerperClient (Async)
+# SerpClient (Async)
 # =============================
-class SerperClientAsync:
-    """Async wrapper around Serper search & scrape endpoints.
+class SerpClientAsync:
+    """Async wrapper around Serp search & scrape endpoints.
 
     Parameters
     ----------
     api_key : str
-        Your Serper API key.
+        Your Serp API key.
     """
-
-    _SCRAPE_ENDPOINT = "https://scrape.serper.dev/"
-
     def __init__(self, 
                  browser_client, 
                  api_key: str, 
                  num_output_per_query: int = 20, 
                  content_type_timeout: float = 0.25,
                  use_youtube_transcript: bool = True,
-                 top_k = None):
-        self.headers = {
-            "X-API-KEY": api_key,
-            "Content-Type": "application/json",
-        }
+                 top_k = None,
+                 exclude_domain: List[str] = []):
         self.client = browser_client
+        self.api_key = api_key
         self.num_output_per_query = num_output_per_query
         self.content_type_timeout = content_type_timeout
         self.use_youtube_transcript = use_youtube_transcript
         self.top_k = top_k
+        self.exclude_domain = exclude_domain
     # ---------------------------------------------------------------------
     # Public API
     # ---------------------------------------------------------------------
@@ -65,22 +46,35 @@ class SerperClientAsync:
         """Perform a Serper "search" request and return the raw JSON."""
         lang = Language.from_code(payload['language'])
         period = payload['period']
-        serper_payload = {"q": payload['query'], "num": self.num_output_per_query, "hl": lang.query_params["hl"]}
+        serp_payload = {"q": payload['query'], "num": self.num_output_per_query, "hl": lang.query_params["hl"], "api_key": self.api_key}
+
+        if payload['type'] == "News":
+            serp_payload['engine'] = 'google_news'
+        elif payload['type'] == 'Videos':
+            serp_payload['engine'] = 'google_videos'
+        elif payload['type'] == 'Scholar':
+            serp_payload['engine'] = 'google_scholar'
+        elif payload['type'] == 'Shopping':
+            serp_payload['engine'] = 'google_shopping'
+        elif payload['type'] == 'Places':
+            serp_payload['engine'] = 'google_maps'
+        elif payload['type'] == 'Images':
+            serp_payload['engine'] = 'google_images'
 
         if period == "Past hour":
-            serper_payload["tbs"] = "qdr:h"
+            serp_payload["tbs"] = "qdr:h"
         elif period == "Past 24 hours":
-            serper_payload["tbs"] = "qdr:d"
+            serp_payload["tbs"] = "qdr:d"
         elif period == "Past week":
-            serper_payload["tbs"] = "qdr:w"
+            serp_payload["tbs"] = "qdr:w"
         elif period == "Past month":
-            serper_payload["tbs"] = "qdr:m"
+            serp_payload["tbs"] = "qdr:m"
         elif period == "Past year":
-            serper_payload["tbs"] = "qdr:y"
+            serp_payload["tbs"] = "qdr:y"
 
-        url = SEARCH_CATEGORY[payload['type']]
+        url = SERP_URL
 
-        resp = await self.client.post(url, headers=self.headers, json=serper_payload)
+        resp = await self.client.get(url, params=serp_payload)
         if resp.status_code != 200:
             return []
         else:
@@ -153,39 +147,25 @@ class SerperClientAsync:
         
         console.log(f"[pink bold]WebSearch-Deduplication: {time.time() - start_time:.2f} seconds")
         return final_results
-    
-    async def scrape_webpage(self, url: str) -> str:
-        """Retrieve raw HTML text via Serper's webpage scraper endpoint."""
-        resp = await self.client.post(
-            self._SCRAPE_ENDPOINT, headers=self.headers, json={"url": url}
-        )
-        resp.raise_for_status()
-        return resp.text
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
     def extract_components(self, language: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Flatten Serper response items into a uniform dictionary.
-
-        The method is generic across all Serper response types (search, places,
-        images, videos, shopping, news). It minimises field‑specific boilerplate
-        by using handler mappings.
-        """
 
         if self.use_youtube_transcript:
-            EXCLUDE_DOMAIN.append("youtube.com")
+            self.exclude_domain.append("youtube.com")
 
         # Determine result type → list‑key mapping
         result_type: str = data.get("searchParameters", {}).get("type", "search")
         list_key_map: Dict[str, str] = {
-            "search": "organic",
-            "places": "places",
-            "images": "images",
-            "videos": "videos",
-            "shopping": "shopping",
-            "news": "news",
-            "scholar": "organic",
+            "search": "organic_results",
+            "places": "local_results",
+            "images": "images_results",
+            "videos": "video_results",
+            "shopping": "shopping_results",
+            "news": "news_results",
+            "scholar": "organic_results",
         }
         items: List[Dict[str, Any]] = data.get(list_key_map[result_type], [])
 
@@ -218,7 +198,7 @@ class SerperClientAsync:
         results = []
         for item in items:
             url = item.get("link", item.get("website", ""))
-            if any(domain in url for domain in EXCLUDE_DOMAIN):
+            if any(domain in url for domain in self.exclude_domain):
                 continue
             results.append({
                 "title": item.get("title", ""),

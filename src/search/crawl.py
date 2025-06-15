@@ -40,10 +40,11 @@ class Crawler:
     '''
     return: title, url, snippet, image_url, date, content
     '''
-    def __init__(self, browser_client, max_content_length=20000):
+    def __init__(self, browser_client, use_db_content=False, max_content_length=20000):
         self.browser_client = browser_client
         self.max_content_length = max_content_length
         self.num_contents = 0
+        self.use_db_content = use_db_content
         self.html_converter = HtmlConverter()
 
         self._setup_extractors()
@@ -181,12 +182,13 @@ class Crawler:
     async def crawl(self, source):
         url = source['url']
         
-        pg_doc = await get_document_from_pg(url) # db_utils의 함수 사용
-        if pg_doc and pg_doc.get('content'): # content가 있는 경우에만 DB 히트로 간주
-            # logger.info(f"Content for {url} found in PostgreSQL.")
-            content = pg_doc.get('content')
-        else:
-            # logger.info(f"Content for {url} not found in PostgreSQL.")
+        content = ""
+        if self.use_db_content:
+            pg_doc = await get_document_from_pg(url)
+            if pg_doc and pg_doc.get('content'):
+                content = pg_doc.get('content')
+        
+        if not content:
             try:
                 extractor = self.extractor_registry.get_extractor(url)
                 if extractor:
