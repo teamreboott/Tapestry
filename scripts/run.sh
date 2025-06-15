@@ -21,16 +21,20 @@ echo "Creating and setting up directories..."
 # PostgreSQL 데이터 디렉토리 설정
 sudo mkdir -p "$POSTGRES_DATA_DIR"
 sudo chown -R 999:999 "$POSTGRES_DATA_DIR"
-sudo chmod -R 700 "$POSTGRES_DATA_DIR"
+sudo chmod -R 755 "$POSTGRES_DATA_DIR"
 
 # 로그 디렉토리 설정
 sudo mkdir -p "$LOG_DIR"
 sudo chmod -R 755 "$LOG_DIR"
 
+echo "Postgres data directory: $POSTGRES_DATA_DIR"
+echo "Log directory: $LOG_DIR"
+
 # Docker 컨테이너 재시작
 echo "Restarting Docker containers..."
-docker compose down
-ENV_FILE="$ENV_FILE" \
+POSTGRES_USER="$POSTGRES_USER" \
+POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+POSTGRES_DB="$POSTGRES_DB" \
 POSTGRES_DATA_DIR="$POSTGRES_DATA_DIR" \
 LOG_DIR="$LOG_DIR" \
 docker compose up --build -d
