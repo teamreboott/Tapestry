@@ -1,4 +1,7 @@
-# <img src="misc/logo.png" alt="logo" width="32" style="vertical-align: middle;"> Tapestry
+   <p align="center">
+     <img src="misc/logo.png" alt="logo" width="62"><br>
+     <span style="font-size:1.5em; font-weight:bold;">Tapestry</span>
+   </p>
 
 English | [한국어](README.ko.md)
 
