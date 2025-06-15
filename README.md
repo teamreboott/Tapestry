@@ -1,9 +1,11 @@
    <p align="center">
-     <img src="misc/logo.png" alt="logo" width="62"><br>
-     <strong style="font-size:1.5em; font-weight:bold;">Tapestry</strong>
+     <img src="misc/logo.png" alt="logo" width="72"><br>
+     <strong style="font-size:2.5em; font-weight:bold;">Tapestry</strong>
    </p>
 
-English | [한국어](README.ko.md)
+<p align="center">
+  English | <a href="README.ko.md">한국어</a>
+</p>
 
 Tapestry : Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
 
