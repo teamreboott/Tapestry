@@ -15,35 +15,35 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Overview](#overview)
-- [Preview](#preview)
-- [Support](#support)
+- [Overview](#-overview)
+- [Preview](#-preview)
+- [Support](#-support)
 - [Quick Start](#-quick-start)
     - [Prerequisite Step](#1-prerequisites-environment-configuration)
     - [Running with Docker](#2-running-with-docker)
     - [Running with Kubernetes](#3-running-with-kubernetes)
-- [API Reference](#api-reference)
+- [API Reference](#-api-reference)
 - [Client Tests](#-testing-the-service)
-- [Demo](#demo)
+- [Demo](#-demo)
     - [Gradio](#gradio)
 - [API Endpoints](#api-endpoints)
-- [Project Structures](#project-structure)
+- [Project Structures](#-project-structure)
 
 ---
 
-## Overview
+## 📖 Overview
 
 TDB
 
 ---
 
-## Preview
+## 🔍 Preview
 
 TDB
 
 ---
 
-## Support
+## 🛠️ Support
 
 ### Search Engines
 
@@ -129,7 +129,7 @@ For deployment in a Kubernetes cluster.
 
 ---
 
-## API Reference
+## 📚 API Reference
 
 TDB
 
@@ -156,7 +156,7 @@ You can test the streaming API using the provided client script.
 
 ---
 
-## Demo
+## 🎬 Demo
 
 TDB
 
@@ -171,7 +171,7 @@ TDB
 
 ---
 
-## Project Structure
+## 🧩 Project Structure
 
 ```
 .
