@@ -32,7 +32,7 @@
 
 ## 📖 Overview
 
-`Tapestry` is an open-source backend framework designed to build customizable AI web search pipelines. Tapestry allows developers to flexibly combine **plug-and-play modules** for search categories, domain-specific crawling, LLMs, and algorithms for improving search performance (e.g., deduplication, query rewriting).
+`Tapestry` is an open-source backend framework designed to build customizable AI web search pipelines. Tapestry allows developers to flexibly combine **plug-and-play modules**, including search engines, domain-specific crawling, LLMs, and algorithms for improving search performance (e.g., deduplication, query rewriting).
 
 ![데모](misc/preview.gif)
 
@@ -136,11 +136,11 @@ You can test the streaming API using the provided client script.
 
 1.  **Run the client:**
     ```bash
-    python service/client_stream.py
+    python tests/client_stream.py
     ```
 
 2.  **Configure the Endpoint:**  
-    Before running, open `service/client_stream.py` and ensure the `SERVER_URL` variable points to the correct endpoint for your environment:
+    Before running, open `tests/client_stream.py` and ensure the `SERVER_URL` variable points to the correct endpoint for your environment:
     -   **Docker:** `http://127.0.0.1:9012/websearch`
     -   **Kubernetes:** `http://127.0.0.1:30800/websearch` (or your `K8S_IP` and `NODE_PORT`).
 
