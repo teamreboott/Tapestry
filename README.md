@@ -19,7 +19,7 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
 - [Preview](#-preview)
 - [Support](#-support)
 - [Quick Start](#-quick-start)
-    - [Prerequisite Step](#1-prerequisites-environment-configuration)
+    - [Setup](#1-prerequisites-environment-configuration)
     - [Running with Docker](#2-running-with-docker)
     - [Running with Kubernetes](#3-running-with-kubernetes)
 - [API Reference](#-api-reference)
@@ -39,7 +39,7 @@ TDB
 
 ## 🔍 Preview
 
-TDB
+[🎥 preview](misc/preview.mov)
 
 ---
 
@@ -64,7 +64,7 @@ TDB
 
 This guide provides instructions for running the Tapestry service using Docker or Kubernetes.
 
-### 1. Prerequisites: Environment Configuration
+### 1. Setup: Environment Configuration
 
 Before launching the service, you must configure your environment variables. All settings are managed through a `.env` file in the `envs` directory.
 
