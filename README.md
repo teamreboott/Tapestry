@@ -17,6 +17,7 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
 
 - [Overview](#overview)
 - [Preview](#preview)
+- [Support](#support)
 - [Quick Start](#-quick-start)
     - [Prerequisite Step](#1-prerequisites-environment-configuration)
     - [Running with Docker](#2-running-with-docker)
@@ -27,6 +28,35 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
     - [Gradio](#gradio)
 - [API Endpoints](#api-endpoints)
 - [Project Structures](#project-structure)
+
+---
+
+## Overview
+
+TDB
+
+---
+
+## Preview
+
+TDB
+
+---
+
+## Support
+
+### Search Engines
+
+| Engine | API Key | Search | Youtube Search | News Search | Scholar Search | Shopping |
+|:-------------:|:----:|:----:|:----:|:----:|:----:|:----:|
+| Serper | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Serp | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Brave | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| DuckDuckGo | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
+
+### LLMs
+
+* **OpenAI, Anthropic, Gemini**
 
 ---
 
