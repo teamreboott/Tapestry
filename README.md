@@ -16,7 +16,6 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
 ## Table of Contents <!-- omit in toc -->
 
 - [Overview](#-overview)
-- [Preview](#-preview)
 - [Support](#-support)
 - [Quick Start](#-quick-start)
     - [Setup](#1-prerequisites-environment-configuration)
@@ -33,11 +32,7 @@ Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruct
 
 ## 📖 Overview
 
-TDB
-
----
-
-## 🔍 Preview
+**TDB**
 
 ![데모](misc/preview.gif)
 
