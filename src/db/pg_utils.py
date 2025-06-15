@@ -4,7 +4,6 @@ from sqlalchemy import create_engine, text, Column, String, DateTime, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.exc import SQLAlchemyError
-from elasticsearch import AsyncElasticsearch, exceptions as es_exceptions
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from configs.config import Settings
