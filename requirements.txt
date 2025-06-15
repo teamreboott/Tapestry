@@ -8,7 +8,6 @@ aiohttp==3.11.11
 aiofiles==23.2.1
 httpx[http2]==0.27.2
 uvloop==0.21.0
-cloudscraper==1.2.71
 
 # 데이터베이스 관련
 psycopg2-binary==2.9.10
@@ -23,12 +22,10 @@ gunicorn==22.0.0
 # AI/ML 관련
 openai==1.86.0
 anthropic==0.54.0
-fasttext==0.9.3
 litellm==1.71.3
 
 # 문서 및 텍스트 처리
 beautifulsoup4==4.12.3
-trafilatura==2.0.0
 markdownify==1.1.0
 pdfminer==20191125
 pdfminer.six==20250506
@@ -40,7 +37,7 @@ simhash==2.1.2
 pandas==2.2.3
 
 # 검색 엔진
-elasticsearch[async]==8.0.0
+duckduckgo_search==8.0.4
 
 # 웹 스크래핑 및 자동화
 selenium==4.33.0
