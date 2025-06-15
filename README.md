@@ -1,8 +1,25 @@
-# Tapestry
+# <img src="misc/logo.png" alt="logo" width="32" style="vertical-align: middle;"> Tapestry
 
 English | [한국어](README.ko.md)
 
-A web search-based LLM QA system, designed for the CIKM 2025 demo track.
+Tapestry : Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
+
+---
+
+## Table of Contents <!-- omit in toc -->
+
+- [Overview](#overview)
+- [Preview](#preview)
+- [Quick Start](#-quick-start)
+    - [Prerequisite Step](#1-prerequisites-environment-configuration)
+    - [Running with Docker](#2-running-with-docker)
+    - [Running with Kubernetes](#3-running-with-kubernetes)
+- [API Reference](#api-reference)
+- [Client Tests](#-testing-the-service)
+- [Demo](#demo)
+    - [Gradio](#gradio)
+- [API Endpoints](#api-endpoints)
+- [Project Structures](#project-structure)
 
 ---
 
@@ -75,7 +92,13 @@ For deployment in a Kubernetes cluster.
 
 ---
 
-## 🧪 Testing the Service
+## API Reference
+
+TDB
+
+---
+
+## 🧪 Client Tests
 
 You can test the streaming API using the provided client script.
 
@@ -93,6 +116,14 @@ You can test the streaming API using the provided client script.
     Before running, open `service/client_stream.py` and ensure the `SERVER_URL` variable points to the correct endpoint for your environment:
     -   **Docker:** `http://127.0.0.1:9012/websearch`
     -   **Kubernetes:** `http://127.0.0.1:30800/websearch` (or your `K8S_IP` and `NODE_PORT`).
+
+---
+
+## Demo
+
+TDB
+
+### Gradio
 
 ---
 
