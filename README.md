@@ -128,7 +128,7 @@ For deployment in a Kubernetes cluster.
 
 `POST /websearch`
 
-#### Request body
+### 📨 Request body
 
 * `query` | `string` | **Required**: The search query string.
 
@@ -156,7 +156,7 @@ For deployment in a Kubernetes cluster.
 * `stream` | `bool` | Optional, defaults to `True`: Return the response as a streaming output.
 
 
-#### Response
+### 📬 Response
 
 The API returns a streaming JSON response with the following status types:
 
@@ -164,7 +164,7 @@ The API returns a streaming JSON response with the following status types:
 - `streaming`: Returns incremental answer tokens as they are generated (if `stream=true`).
 - `complete`: Final answer and metadata.
 
-##### Example Responses
+#### Example Responses
 
 - **Processing**
 
