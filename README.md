@@ -25,7 +25,7 @@
 - [Client Tests](#-testing-the-service)
 - [Demo](#-demo)
     - [Gradio](#gradio)
-- [API Endpoints](#api-endpoints)
+- [How do Tapestry work?](#framework)
 - [Project Structures](#-project-structure)
 
 ---
@@ -126,7 +126,35 @@ For deployment in a Kubernetes cluster.
 
 ## 📚 API Reference
 
-TDB
+`POST /websearch`
+
+#### Request body (variable | type | required)
+
+* `query` | `string` | **Required**: The search query string.
+
+* `language` | `string` | Optional, defaults to `"en"`: ISO 639-1 two-letter language code (e.g., en, ko, ja).
+
+* `search_type` | `string` | Optional, defaults to `"auto"`: 
+    - `auto`: The LLM automatically infers the search type from the query and selects the appropriate search engine.
+    - `general`: Uses only indexed content from general search results for answering.
+    - `news`: Uses only indexed content from news search results for answering.
+    - `scholar`: Uses only indexed content from scholarly search results for answering. If the search engine does not support this, it falls back to `general` search.
+    - `youtube`: Extracts and uses only YouTube video links from video search results for answering. If the search engine does not support this, it falls back to `general` search.
+
+* `persona_prompt` | `string` | Optional, defaults to `None`: Persona instructions for the LLM.
+
+* `custom_prompt` | `string` | Optional, defaults to `None`: Additional custom instructions to inject into the LLM.
+
+* `messages` | `array` | Optional, defaults to `None`: Previous conversation history. Must follow the format: `[{"role": "user", "content": ""}, {"role": "assistant", "content": ""}, ...]`.
+
+* `target_nuance` | `string` | Optional, defaults to `"Natural"`: Desired response nuance.
+
+* `use_youtube_transcript` | `bool` | Optional, defaults to `False`: If YouTube results are included, use transcript information.
+
+* `top_k` | `int` | Optional, defaults to `None`: Use the top `k` search results.
+
+* `stream` | `bool` | Optional, defaults to `True`: Return the response as a streaming output.
+
 
 ---
 
@@ -136,11 +164,11 @@ You can test the streaming API using the provided client script.
 
 1.  **Run the client:**
     ```bash
-    python tests/client_stream.py
+    python tests/client.py
     ```
 
 2.  **Configure the Endpoint:**  
-    Before running, open `tests/client_stream.py` and ensure the `SERVER_URL` variable points to the correct endpoint for your environment:
+    Before running, open `tests/client.py` and ensure the `SERVER_URL` variable points to the correct endpoint for your environment:
     -   **Docker:** `http://127.0.0.1:9012/websearch`
     -   **Kubernetes:** `http://127.0.0.1:30800/websearch` (or your `K8S_IP` and `NODE_PORT`).
 
@@ -154,7 +182,7 @@ TDB
 
 ---
 
-## API Endpoints
+## Framework
 
 - `GET /health`: Health check endpoint.
 - `POST /websearch`: Main QA endpoint with a streaming response.
