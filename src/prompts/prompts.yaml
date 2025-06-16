@@ -1,38 +1,26 @@
 outline_prompt: |
-  너에게 유저가 요청한 쿼리와 검색엔신을 통해 추출된 콘텐츠가 주어진다.
-  주어지는 정보를 종합하여 소제목들을 제안하는 것이 목표이다.
+  You are given a user query and content extracted from search engines. Your goal is to generate relevant subtitles/headings that comprehensively address the user's query using the provided information.
 
-  ### 규칙
-  1. 소제목은 최대 5개로 제안해야한다.
-  2. 소제목 앞에는 숫자로 번호를 붙여야한다 (예: 1. TL;DR, 2. Unique Characteristics of the Company)
-  3. 각각의 소제목은 서로 다른 주제를 가지고 있어야한다.
-  4. 유저가 요청한 쿼리에 대한 대답을 정확하고 자세하게 제공할 수 있는 소제목을 제안해야한다.
-  5. 소제목은 유저가 요청한 쿼리의 언어로 작성해야한다. 예를들어 유저가 영어로 쿼리를 작성했다면 소제목도 영어로 작성해야한다.
-  6. 첫번째 소제목은 유저가 요청한 쿼리에 대한 간략한 답변을 제공할 수 있는 소제목이어야한다.
-  7. The answer MUST be written in {target_language}.
-
-  ### Output 형식
-  JSON형태로 반환해라.
-  {{
-      sub_titles: ["1. 소제목 1", "2. 소제목 2", ..., "N. 소제목 N"]
-  }}
-
-  ### 예시
-  QUERY: "루닛은 뭐하는 회사야?"
-  OUTPUT: {{
-      sub_titles: ["1. 루닛 회사 소개", "2. 루닛 회사 연혁", "3. 루닛 회사 주요 제품", "4. 최근 뉴스 및 2025년 주요 이슈"]
-  }}
-  ---
-  QUERY: "LLama-index 라이브러리에서 index는 무엇을 의미해?"
-  OUTPUT: {{
-      sub_titles: ["1. 간략 답변", "2. LlamaIndex의 인덱싱(Indexing) 개념과 역할", ..., "5. 각 인덱스 유형의 장단점 및 활용 사례"]
-  }}
-
-  ### 유저가 요청한 쿼리
-  {query}
-
-  ### 검색엔진을 통해 추출된 콘텐츠
+  ### Search Engine Results
   {content}
+
+  ### Rules
+  1. Quantity: Generate exactly 3-5 subtitles (no more, no less)
+  2. Numbering: Each subtitle must be prefixed with a number (e.g., "1. Executive Summary", "2. Technical Architecture")
+  3. Uniqueness: Each subtitle must cover a distinct aspect or topic - no overlap or redundancy
+  4. Relevance: Subtitles must directly support answering the user's query with accurate and detailed information
+  5. Priority Structure: The first subtitle should provide a  **directly answers** the core query
+  6. Target Language: The subtitles MUST be written in {target_language}
+
+  ### Output Format
+  Return your response in JSON format only:
+  {{
+      sub_titles: ["1. Subtitle 1", "2. Subtitle 2", ..., "N. Subtitle N"]
+  }}
+
+  ### Input Data
+  QUERY: {query}
+  OUTPUT:
 
 web_prompt: |
   You are an AI assistant specialized in professionally optimizing web queries to accurately understand users' search intent and obtain optimal search results. You must analyze the user's original query and suggest search type, optimized query, search country, and search period.
