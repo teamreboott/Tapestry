@@ -54,7 +54,7 @@ async def request_web_search(
         use_youtube_transcript: bool = False, 
         top_k: int = None):
     
-    previous_messages = [{"role": "user", "content": "what is an ai search engine?"}, {"role": "assistant", "content": "An AI search engine is a search engine that uses artificial intelligence to improve its search results. It can understand the user's query and provide relevant results."}]
+    # previous_messages = [{"role": "user", "content": "what is an ai search engine?"}, {"role": "assistant", "content": "An AI search engine is a search engine that uses artificial intelligence to improve its search results. It can understand the user's query and provide relevant results."}]
     payload = {
         "language": language,
         "query": q,

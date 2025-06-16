@@ -16,8 +16,8 @@ web_search:
   n_queries: 3
 
 db:
-  use_db_content: true
-  save_content_to_db: true
+  use_db_content: false
+  save_content_to_db: false
 
 exclude_domain: 
   - "namu.wiki"

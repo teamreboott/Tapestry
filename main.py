@@ -80,6 +80,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Web Search API", version="0.1.0", lifespan=lifespan)
 semaphore = asyncio.Semaphore(settings.SEMAPHORE_LIMIT)
 
+search_type_map = {
+    "auto": "auto",
+    "general": "Search",
+    "scholar": "Scholar",
+    "news": "News",
+    "youtube": "Videos",
+}
+
 
 class SearchType(str, Enum):
     auto = "auto"
@@ -141,7 +149,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         history_messages = history_messages[-4:]
     query = payload.query.replace('\n', ' ').replace('\t', ' ').strip()
     language = payload.language
-    search_type = payload.search_type
+    search_type = search_type_map[payload.search_type]
     persona_prompt = payload.persona_prompt
     custom_prompt = payload.custom_prompt
     target_nuance = payload.target_nuance
@@ -168,18 +176,21 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
 
     try:
         query_list = []
-        if len(query) > 300:
+        if len(query) > 100:
             num_samples = config['web_search']['n_queries']
         else:
             num_samples = max(config['web_search']['n_queries'] - 1, 1)
-            query_list.append({"query": query, "type": "Search", "language": language, "period": "Any time"})
+            if search_type == "auto" or search_type == "Search":
+                query_list.append({"query": query, "type": "Search", "language": language, "period": "Any time"})
+            else:
+                query_list.append({"query": query, "type": search_type, "language": language, "period": "Any time"})
 
         date_str = query_rewriter.get_date()
 
         if num_history_messages > 0:
-            prompt = prompts['web_prompt_history'].format(history=history_messages, query=query, date=date_str, num_samples=num_samples)
+            prompt = prompts['web_prompt_history'].format(history=history_messages, query=query, date=date_str, num_samples=num_samples, target_language=target_language_name, request_search_type=search_type)
         else:
-            prompt = prompts['web_prompt'].format(query=query, date=date_str, num_samples=num_samples)
+            prompt = prompts['web_prompt'].format(query=query, date=date_str, num_samples=num_samples, target_language=target_language_name, request_search_type=search_type)
 
         if num_history_messages == 0 and is_url(query):
             use_search_engine = False
@@ -237,7 +248,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         if return_process:
             yield json_line({"status": "processing", "message": {"title": f"Searching {total_results} search results..."}})
 
-        # 소제목 생성과 웹 콘텐츠 스크래핑을 병렬로 실행
         async def get_outlines(outline_prompt):
             outline_response = await outline_generator.get_response([{"role": "user", "content": outline_prompt}])
             prompt_usage = outline_response.get("prompt_usage", 0)
