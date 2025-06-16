@@ -33,3 +33,11 @@ class BrunchBlogExtractor(ContentExtractor):
     
     async def extract(self, url: str, browser_client) -> str:
         return await async_extract_brunch_blog_content(url, browser_client)
+    
+
+BLOG_EXTRACTORS = {
+    "blog.naver.com": NaverBlogExtractor,
+    "seo.goover.ai": GooverBlogExtractor,
+    "tistory.com": TistoryBlogExtractor,
+    "brunch.co.kr": BrunchBlogExtractor,
+}

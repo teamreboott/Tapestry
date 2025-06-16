@@ -20,3 +20,9 @@ class WikipediaExtractor(ContentExtractor):
     async def extract(self, url: str, browser_client) -> str:
         content = await async_extract_wiki_content(url, browser_client)
         return content
+
+
+MEDIA_EXTRACTORS = {
+    "youtube.com": YoutubeExtractor,
+    "wikipedia.org": WikipediaExtractor,
+}

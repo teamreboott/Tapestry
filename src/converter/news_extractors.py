@@ -13,6 +13,7 @@ from .mt_news.url2md_async import async_extract_mt_news_content
 from .sbs_news.url2md_async import async_extract_sbs_news_content
 from .ohmynews_news.url2md_async import async_extract_ohmynews_content
 
+
 class ChosunExtractor(ContentExtractor):
     def can_handle(self, url: str) -> bool:
         return "chosun.com" in url
@@ -109,3 +110,20 @@ class OhmynewsExtractor(ContentExtractor):
     
     async def extract(self, url: str, browser_client) -> str:
         return await async_extract_ohmynews_content(url, browser_client)
+
+
+NEWS_EXTRACTORS = {
+    "chosun.com": ChosunExtractor,
+    "donga.com": DongaExtractor,
+    "news.nate.com": NateNewsExtractor,
+    "sedaily.com": SedailyNewsExtractor,
+    "kmib.co.kr": KmibNewsExtractor,
+    "aitimes.com": AitimesNewsExtractor,
+    "dongascience.com": DongascienceNewsExtractor,
+    "joongang.co.kr": JoongangNewsExtractor,
+    "yna.co.kr": YnaNewsExtractor,
+    "dt.co.kr": DtNewsExtractor,
+    "mt.co.kr": MtNewsExtractor,
+    "news.sbs.co.kr": SbsNewsExtractor,
+    "ohmynews.com": OhmynewsExtractor,
+}

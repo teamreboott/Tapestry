@@ -60,6 +60,7 @@ query_rewriter = QueryRewriter(model=QUERY_REWRITE_MODEL_NAME, max_tokens=config
 outline_generator = OutlineGenerator(model=OUTLINE_GENERATOR_MODEL_NAME, max_tokens=config['models']['outline_generator']['max_tokens'])
 answer_generator = AnswerGenerator(model=ANSWER_GENERATOR_MODEL_NAME, max_tokens=config['models']['answer_generator']['max_tokens'])
 
+crawler = Crawler(news_list=config['domain_crawler']['news'], blog_list=config['domain_crawler']['blog'], media_list=config['domain_crawler']['media'], use_db_content=config['db']['use_db_content'], max_content_length=20000)
 
 # --------------------------------------------------------------------------------
 # FastAPI application & lifespan events
@@ -131,7 +132,9 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
     start_time = time.time()
     browser_client = load_browser_client()
 
-    # 1) Initialize components
+    # ================================
+    # Initialize components
+    # ================================
     history_messages = payload.messages
     num_history_messages = len(history_messages)
     if num_history_messages > 4:
@@ -152,7 +155,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
 
     answer_prompt_usage = answer_completion_usage = answer_total_usage = 0
 
-    # 2) Initialize Web Engine Client
     web_engine_client = load_search_engine(engine_name=config['web_search']['engine'],
                                            browser_client=browser_client,
                                            num_output_per_query=config['web_search']['num_output_per_query'],
@@ -160,9 +162,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
                                            use_youtube_transcript=use_youtube_transcript,
                                            top_k=top_k,
                                            exclude_domain=config['exclude_domain'])
-
-    # 3) Initialize Crawler
-    crawler = Crawler(browser_client=browser_client, use_db_content=config['db']['use_db_content'], max_content_length=20000)
 
     if return_process:
         yield json_line({"status": "processing", "message": {"title": "Analyzing the question..."}})
@@ -257,11 +256,11 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         if use_search_engine:
             outline_prompt = prompts['outline_prompt'].format(query=merged_query, content=merged_content, target_language=target_language_name)
             outline_task = get_outlines(outline_prompt)
-            crawl_task = crawler.multiple_crawl(scraped_sources)
+            crawl_task = crawler.multiple_crawl(browser_client, scraped_sources)
             outline_results, web_contents = await asyncio.gather(outline_task, crawl_task)
 
         else:
-            web_contents = await crawler.crawl(scraped_sources[0])
+            web_contents = await crawler.crawl(browser_client, scraped_sources[0])
             web_contents = [web_contents]
             url_content = web_contents[0]['content']
             outline_prompt = prompts['outline_prompt'].format(query=query, content=url_content)

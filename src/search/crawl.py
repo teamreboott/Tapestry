@@ -5,28 +5,9 @@ import uvloop
 import time
 from urllib.parse import urlparse
 from src.converter import ExtractorRegistry
-from src.converter.news_extractors import (
-    ChosunExtractor, 
-    DongaExtractor, 
-    NateNewsExtractor, 
-    SedailyNewsExtractor, 
-    KmibNewsExtractor,
-    AitimesNewsExtractor,
-    DongascienceNewsExtractor,
-    JoongangNewsExtractor,
-    YnaNewsExtractor,
-    DtNewsExtractor,
-    MtNewsExtractor,
-    SbsNewsExtractor,
-    OhmynewsExtractor
-)
-from src.converter.blog_extractors import (
-    NaverBlogExtractor,
-    GooverBlogExtractor,
-    TistoryBlogExtractor,
-    BrunchBlogExtractor
-)
-from src.converter.media_extractors import YoutubeExtractor, WikipediaExtractor
+from src.converter.news_extractors import NEWS_EXTRACTORS
+from src.converter.blog_extractors import BLOG_EXTRACTORS
+from src.converter.media_extractors import MEDIA_EXTRACTORS
 from src.converter.html_converter import HtmlConverter
 from src.db.pg_utils import get_document_from_pg
 from structlog import get_logger
@@ -40,8 +21,10 @@ class Crawler:
     '''
     return: title, url, snippet, image_url, date, content
     '''
-    def __init__(self, browser_client, use_db_content=False, max_content_length=20000):
-        self.browser_client = browser_client
+    def __init__(self, news_list, blog_list, media_list, use_db_content=False, max_content_length=20000):
+        self.news_list = news_list
+        self.blog_list = blog_list
+        self.media_list = media_list
         self.max_content_length = max_content_length
         self.num_contents = 0
         self.use_db_content = use_db_content
@@ -53,27 +36,16 @@ class Crawler:
         self.extractor_registry = ExtractorRegistry()
         
         # news extractors
-        self.extractor_registry.register(ChosunExtractor())
-        self.extractor_registry.register(DongaExtractor())
-        self.extractor_registry.register(NateNewsExtractor())
-        self.extractor_registry.register(SedailyNewsExtractor())
-        self.extractor_registry.register(KmibNewsExtractor())
-        self.extractor_registry.register(AitimesNewsExtractor())
-        self.extractor_registry.register(DongascienceNewsExtractor())
-        self.extractor_registry.register(JoongangNewsExtractor())
-        self.extractor_registry.register(YnaNewsExtractor())
-        self.extractor_registry.register(DtNewsExtractor())
-        self.extractor_registry.register(MtNewsExtractor())
-        self.extractor_registry.register(SbsNewsExtractor())
-        self.extractor_registry.register(OhmynewsExtractor())
+        for news_domain in self.news_list:
+            self.extractor_registry.register(NEWS_EXTRACTORS[news_domain]())
+
         # blog extractors
-        self.extractor_registry.register(NaverBlogExtractor())
-        self.extractor_registry.register(GooverBlogExtractor())
-        self.extractor_registry.register(TistoryBlogExtractor())
-        self.extractor_registry.register(BrunchBlogExtractor())
+        for blog_domain in self.blog_list:
+            self.extractor_registry.register(BLOG_EXTRACTORS[blog_domain]())
+
         # media extractors
-        self.extractor_registry.register(YoutubeExtractor())
-        self.extractor_registry.register(WikipediaExtractor())
+        for media_domain in self.media_list:
+            self.extractor_registry.register(MEDIA_EXTRACTORS[media_domain]())
 
     def extract_pdf_text(self, pdf_bytes: bytes) -> str:
         text = ""
@@ -101,7 +73,7 @@ class Crawler:
         # encode/decode 방식으로 서러게이트 문자 처리 (for 루프보다 훨씬 빠름)
         return text.encode('utf-8', 'ignore').decode('utf-8')
 
-    async def _fetch_text(self, url: str) -> str:
+    async def _fetch_text(self, url: str, browser_client) -> str:
         """Download *url* and return decoded body text."""
         
         try:
@@ -109,7 +81,7 @@ class Crawler:
             timeout = httpx.Timeout(connect=0.5, read=0.8, write=0.3, pool=0.2)
             
             # 2. 스트리밍 방식으로 데이터 받기 (메모리 효율성)
-            async with self.browser_client.stream('GET', url, timeout=timeout) as response:
+            async with browser_client.stream('GET', url, timeout=timeout) as response:
                 if response.status_code != 200:
                     return ""
                 
@@ -179,7 +151,8 @@ class Crawler:
         except Exception:
             return ""
 
-    async def crawl(self, source):
+    async def crawl(self, browser_client, source):
+
         url = source['url']
         
         content = ""
@@ -192,9 +165,9 @@ class Crawler:
             try:
                 extractor = self.extractor_registry.get_extractor(url)
                 if extractor:
-                    content = await extractor.extract(url, self.browser_client)
+                    content = await extractor.extract(url, browser_client)
                 else:
-                    content = await self._fetch_text(url)
+                    content = await self._fetch_text(url, browser_client)
             except httpx.HTTPStatusError as e:
                 console.log(f"[red]HTTP error {e.response.status_code} for {url}: {e}")
                 content = f"Failed to fetch with status {e.response.status_code}"
@@ -216,9 +189,9 @@ class Crawler:
         del source['language']
         return source
 
-    async def multiple_crawl(self, sources):
+    async def multiple_crawl(self, browser_client, sources):
         start_time = time.time()
-        scraped_results = await asyncio.gather(*[self.crawl(source) for source in sources])
+        scraped_results = await asyncio.gather(*[self.crawl(browser_client, source) for source in sources])
         console.log(f"[pink bold]Crawler-Extract: {time.time() - start_time:.2f} seconds")
         console.print("[green]****************")
         console.print(f"[green]Extracted contents: {self.num_contents}/{len(sources)}")
