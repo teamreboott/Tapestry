@@ -394,16 +394,6 @@ answer_prompt: |
     - Present final recommendations as bullet points or in a table format.
     - Do not exceed 3 lines of paragraph text in this section.
 
-    [Today's date]
-    {today_date}
-
-    [SUB_TITLES]
-    {sub_titles}
-
-    [Web Search Results]
-    Incorporate relevant details from the provided web search results below to craft your response:
-    {prompt_web_search}
-
     [General Guidelines]
     - All content should be written in Markdown format, including equations, code, tables, and other elements.
     - Answer the user's question honestly and with accuracy based on the provided [Web Search Results].
@@ -418,3 +408,13 @@ answer_prompt: |
     - Provide the response report in a clean and user-friendly format, making good use of line breaks and Markdown formatting for better readability.
     - Write a well-structured report based on the provided [SUB_TITLES], formatting each sub_title as a heading and writing long, detailed paragraphs under each to provide helpful and in-depth information.
     - The answer MUST be written in {target_language}.
+    
+    [Today's date]
+    {today_date}
+
+    [SUB_TITLES]
+    {sub_titles}
+
+    [Web Search Results]
+    Incorporate relevant details from the provided web search results below to craft your response:
+    {prompt_web_search}
