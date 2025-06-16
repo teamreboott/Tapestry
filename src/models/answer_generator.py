@@ -47,6 +47,7 @@ class AnswerGenerator:
                     temperature=1.0,
                     fallbacks=self.fallback_model,
                     stream=True,
+                    stream_options={"include_usage": True},
                     timeout=self.timeout # Add timeout for streaming calls too
                 )
                 return response_stream

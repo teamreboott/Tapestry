@@ -308,6 +308,10 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
                 stream=True
             )
             async for chunk in llm_stream_iterator: # Iterate over LiteLLM's chunk objects
+                if hasattr(chunk, "usage") and chunk.usage is not None:
+                    TOTAL_MODEL_USAGE[ANSWER_GENERATOR_MODEL_NAME]['usage']['input_token_count'] += chunk.usage.prompt_tokens
+                    TOTAL_MODEL_USAGE[ANSWER_GENERATOR_MODEL_NAME]['usage']['output_token_count'] += chunk.usage.completion_tokens
+                    break
                 # Make sure chunk and its attributes are not None
                 if chunk and chunk.choices and chunk.choices[0].delta:
                     token_text = chunk.choices[0].delta.content
@@ -317,14 +321,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
                         yield json_line({"status": "streaming", "delta": {"content": token_text}})
             
             answer_content_for_summary = "".join(collected_answer_chunks)
-
-            # After the stream is exhausted, get usage from the iterator object
-            if hasattr(llm_stream_iterator, 'usage') and llm_stream_iterator.usage:
-                answer_prompt_usage = llm_stream_iterator.usage.prompt_tokens
-                answer_completion_usage = llm_stream_iterator.usage.completion_tokens
-            else:
-                logger.warning("Could not retrieve usage info from streaming response.")
-                # answer_prompt_usage, answer_completion_usage, answer_total_usage remain 0
 
         else: # Non-streaming answer
             answer_response_dict = await answer_generator.get_response(
