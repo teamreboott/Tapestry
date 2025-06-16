@@ -37,14 +37,17 @@ class Crawler:
         
         # news extractors
         for news_domain in self.news_list:
+            console.log(f"[green]Crawler-Extract: {news_domain} registered")
             self.extractor_registry.register(NEWS_EXTRACTORS[news_domain]())
 
         # blog extractors
         for blog_domain in self.blog_list:
+            console.log(f"[green]Crawler-Extract: {blog_domain} registered")
             self.extractor_registry.register(BLOG_EXTRACTORS[blog_domain]())
 
         # media extractors
         for media_domain in self.media_list:
+            console.log(f"[green]Crawler-Extract: {media_domain} registered")
             self.extractor_registry.register(MEDIA_EXTRACTORS[media_domain]())
 
     def extract_pdf_text(self, pdf_bytes: bytes) -> str:
@@ -183,6 +186,10 @@ class Crawler:
                 content = f"Error: {type(e).__name__}" # 예외 유형도 포함
 
         source['content'] = content[:self.max_content_length]
+        console.log(f"[green]Crawler-Extract: {source['title']}")
+        console.log(f"[green]Crawler-Extract: {source['content'][:100]}")
+        console.log(f"[green]Crawler-Extract: {source['url']}")
+        console.log(f"[green]--------------------------------")
         if len(source['content']) > 0:
             self.num_contents += 1
         del source['type']

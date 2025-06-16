@@ -51,4 +51,4 @@ rich==14.0.0
 pydantic-settings==2.9.1
 
 # 미디어 처리
-youtube-transcript-api==0.6.3
+youtube-transcript-api==1.1.0

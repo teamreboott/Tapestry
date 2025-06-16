@@ -158,6 +158,9 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
     use_youtube_transcript = payload.use_youtube_transcript
     top_k = payload.top_k if isinstance(payload.top_k, int) else None
 
+    if search_type == "Videos":
+        use_youtube_transcript = True
+
     target_language_name = Language.from_code(language).query_params["name"]
     reference_label = Language.from_code(language).query_params["source_tag"]
 
@@ -237,6 +240,8 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             logger.error("no_results", query=query, message="No web search results found.")
             yield json_line({"status": "failure", "message": {"title": "No web search results found."}})
             return
+        
+        console.print(f"[green]Crawler-Extract: {query_list}")
 
         merged_query = " ".join([q["query"] for q in query_list])
         merged_content = ""

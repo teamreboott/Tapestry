@@ -9,7 +9,7 @@ HEADTER_TEMPLATE = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/135.0.0.0 Safari/537.36"
     ),
-    "Referer": "",
+    "Referer": "https://www.google.com/",
 }
 ctx = ssl.create_default_context(cafile=certifi.where())
 ua = UserAgent(platforms='desktop')

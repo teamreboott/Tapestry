@@ -153,7 +153,7 @@ class SerpClientAsync:
     # ------------------------------------------------------------------
     def extract_components(self, language: str, data: Dict[str, Any]) -> Dict[str, Any]:
 
-        if self.use_youtube_transcript:
+        if not self.use_youtube_transcript:
             self.exclude_domain.append("youtube.com")
 
         # Determine result type → list‑key mapping

@@ -143,7 +143,7 @@ class BraveClientAsync:
     def extract_components(self, language: str, data: Dict[str, Any]) -> Dict[str, Any]:
         search_type = data.get("type", "search")
 
-        if self.use_youtube_transcript:
+        if not self.use_youtube_transcript:
             self.exclude_domain.append("youtube.com")
 
         results = []
