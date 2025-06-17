@@ -5,10 +5,9 @@ import json
 from rich import print as rprint
 from rich.panel import Panel
 from rich.syntax import Syntax
-import os
 
 # --- Server URL Configuration ---
-SERVER_URL = os.environ.get("API_URL", "http://127.0.0.1:9012/websearch")
+SERVER_URL = "http://1.217.36.114:9012/websearch"
 TIMEOUT = 180
 
 # --- Language Mapping ---
@@ -919,8 +918,57 @@ function() {
 }
 """
 
+# 다크 모드 비활성화
+theme = gr.themes.Soft(primary_hue="indigo", secondary_hue="purple")
+
+# 다크 모드 속성을 라이트 모드 값으로 설정하기 위한 맵
+# Gradio 버전에 따라 존재하지 않을 수 있는 속성을 안전하게 처리
+dark_to_light_map = {
+    # General
+    "body_background_fill_dark": "body_background_fill",
+    "body_text_color_dark": "body_text_color",
+    "text_color_subdued_dark": "text_color_subdued",
+    "background_fill_primary_dark": "background_fill_primary",
+    "background_fill_secondary_dark": "background_fill_secondary",
+    
+    # Blocks
+    "block_background_fill_dark": "block_background_fill",
+    "block_border_color_dark": "block_border_color",
+    "block_label_background_fill_dark": "block_label_background_fill",
+    "block_label_text_color_dark": "block_label_text_color",
+    "block_title_text_color_dark": "block_title_text_color",
+
+    # Inputs (Textbox, Checkbox, etc.)
+    "input_background_fill_dark": "input_background_fill",
+    "input_border_color_dark": "input_border_color",
+    "input_placeholder_color_dark": "input_placeholder_color",
+    
+    # Buttons
+    "button_primary_background_fill_dark": "button_primary_background_fill",
+    "button_primary_text_color_dark": "button_primary_text_color",
+    "button_secondary_background_fill_dark": "button_secondary_background_fill",
+    "button_secondary_text_color_dark": "button_secondary_text_color",
+    "button_cancel_background_fill_dark": "button_cancel_background_fill",
+    "button_cancel_text_color_dark": "button_cancel_text_color",
+    
+    # Accent colors (often used for checkboxes, sliders, etc.)
+    "border_color_accent_dark": "border_color_accent",
+    "color_accent_soft_dark": "color_accent_soft",
+
+    # Other
+    # "shadow_drop_dark": "shadow_drop",
+    # "shadow_drop_lg_dark": "shadow_drop_lg",
+}
+
+settings_to_apply = {}
+for dark_attr, light_attr in dark_to_light_map.items():
+    if hasattr(theme, light_attr):
+        settings_to_apply[dark_attr] = getattr(theme, light_attr)
+
+theme.set(**settings_to_apply)
+
 with gr.Blocks(
-    theme=gr.themes.Soft(primary_hue="indigo", secondary_hue="purple"),
+    theme=theme,
     title="🌐 Tapestry Web Search",
     css=css,
     head=f"<script>{js_code}</script>"
@@ -1105,6 +1153,5 @@ with gr.Blocks(
     )
 
 if __name__ == "__main__":
-    port = int(os.environ.get("GRADIO_PORT", 7860))
     demo.queue()
-    demo.launch(share=False, server_name="0.0.0.0", server_port=port)
+    demo.launch(share=False, server_name="0.0.0.0", server_port=7860)
