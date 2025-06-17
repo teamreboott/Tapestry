@@ -5,9 +5,11 @@ import json
 from rich import print as rprint
 from rich.panel import Panel
 from rich.syntax import Syntax
+import os
 
 # --- Server URL Configuration ---
-SERVER_URL = "http://1.217.36.114:9012/websearch"
+SERVER_URL = os.environ.get("API_URL", "http://127.0.0.1:9012/websearch")
+GRADIO_PORT = int(os.environ.get("GRADIO_PORT", "80"))
 TIMEOUT = 180
 
 # --- Language Mapping ---
@@ -1154,4 +1156,4 @@ with gr.Blocks(
 
 if __name__ == "__main__":
     demo.queue()
-    demo.launch(share=False, server_name="0.0.0.0", server_port=7860)
+    demo.launch(share=False, server_name="0.0.0.0", server_port=GRADIO_PORT)
