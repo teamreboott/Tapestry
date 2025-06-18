@@ -220,15 +220,37 @@ You can test the API using the provided client script.
 
 ## 🎬 Demo
 
-You can watch the demo video directly below:
-
-<p align="center">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/zQjk4DaSmqg" frameborder="0" allowfullscreen></iframe>
-</p>
+> **Note:**  
+> GitHub does not support embedded YouTube videos in README files.  
+> Please click the image below to watch the demo on YouTube.
 
 [![YouTube Preview](https://img.youtube.com/vi/zQjk4DaSmqg/0.jpg)](https://youtu.be/zQjk4DaSmqg)
 
 ### Gradio
+
+Tapestry provides a Gradio-based Web UI for interactive web search and chatbot experience.
+
+#### Quick Start
+
+- **Local Run:**
+  ```bash
+  bash gradio/run_demo.sh
+  ```
+  You can set the port and API address:
+  ```bash
+  GRADIO_PORT=8888 API_URL=http://my-api:9000/websearch bash gradio/run_demo.sh
+  ```
+
+- **Docker Run:**
+  ```bash
+  bash gradio/run_docker_demo.sh
+  ```
+  You can also set the port and API address:
+  ```bash
+  GRADIO_PORT=8888 API_URL=http://my-api:9000/websearch bash gradio/run_docker_demo.sh
+  ```
+
+> For more details, please refer to [`gradio/README.md`](gradio/README.md).
 
 ---
 
@@ -242,16 +264,20 @@ You can watch the demo video directly below:
 ## 🧩 Project Structure
 
 ```
-.
+Tapestry/
 ├── main.py                # Main FastAPI server
 ├── src/                   # Core source code (models, search, db, utils, etc.)
-├── service/               # Service layer
-├── configs/               # Configuration files
-├── scripts/               # Automation scripts (run.sh, run_k8s.sh)
+├── gradio/                # Gradio Web UI
+├── tests/                 # Test clients & API guide
 ├── envs/                  # Environment variable examples and docs
+├── configs/               # Configuration files
 ├── k8s/                   # Kubernetes manifests
+├── scripts/               # Automation scripts (run.sh, run_k8s.sh)
+├── benchmark/             # Benchmark scripts
+├── misc/                  # Miscellaneous (images, gifs)
 ├── requirements.txt       # Python dependencies
 ├── Dockerfile             # Docker build file
 ├── docker-compose.yaml    # Docker Compose file
-└── README.md
+├── LICENSE                # License
+└── .gitignore             # Git ignore rules
 ```
