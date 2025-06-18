@@ -12,6 +12,7 @@ from .dt_news.url2md_asnyc import async_extract_dt_news_content
 from .mt_news.url2md_async import async_extract_mt_news_content
 from .sbs_news.url2md_async import async_extract_sbs_news_content
 from .ohmynews_news.url2md_async import async_extract_ohmynews_content
+from .bbc_news.url2md_async import async_extract_bbc_news_content
 
 
 class ChosunExtractor(ContentExtractor):
@@ -111,6 +112,13 @@ class OhmynewsExtractor(ContentExtractor):
     async def extract(self, url: str, browser_client) -> str:
         return await async_extract_ohmynews_content(url, browser_client)
 
+class BbcNewsExtractor(ContentExtractor):
+    def can_handle(self, url: str) -> bool:
+        return "bbc.com" in url
+    
+    async def extract(self, url: str, browser_client) -> str:
+        return await async_extract_bbc_news_content(url, browser_client)
+
 
 NEWS_EXTRACTORS = {
     "chosun.com": ChosunExtractor,
@@ -126,4 +134,5 @@ NEWS_EXTRACTORS = {
     "mt.co.kr": MtNewsExtractor,
     "news.sbs.co.kr": SbsNewsExtractor,
     "ohmynews.com": OhmynewsExtractor,
+    "bbc.com": BbcNewsExtractor,
 }

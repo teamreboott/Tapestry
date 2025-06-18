@@ -33,6 +33,7 @@ exclude_domain:
 
 domain_crawler:
   news:
+    - "bbc.com"
     - "chosun.com"
     - "donga.com"
     - "news.nate.com"
