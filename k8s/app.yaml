@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tapestry-app
+  labels:
+    app: tapestry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tapestry
+  template:
+    metadata:
+      labels:
+        app: tapestry
+    spec:
+      containers:
+      - name: tapestry-app
+        image: tapestry:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: ${SERVICE_PORT}
+        envFrom:
+        - secretRef:
+            name: tapestry-secrets
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: tapestry-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tapestry-service
+spec:
+  selector:
+    app: tapestry
+  ports:
+  - port: ${SERVICE_PORT}
+    targetPort: ${SERVICE_PORT}
+    nodePort: ${NODE_PORT}
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tapestry-logs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard 

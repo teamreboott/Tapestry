@@ -1,0 +1,79 @@
+# Persistent Volumes
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tapestry-logs-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  hostPath:
+    path: ${LOG_DIR}
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tapestry-postgres-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  hostPath:
+    path: ${POSTGRES_DATA_DIR}
+    type: DirectoryOrCreate
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tapestry-postgres
+spec:
+  serviceName: tapestry-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tapestry-postgres
+  template:
+    metadata:
+      labels:
+        app: tapestry-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        ports:
+        - containerPort: ${POSTGRES_PORT}
+        envFrom:
+        - secretRef:
+            name: tapestry-secrets
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      storageClassName: standard
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: tapestry-postgres
+spec:
+  selector:
+    app: tapestry-postgres
+  ports:
+  - port: ${POSTGRES_PORT}
+    targetPort: ${POSTGRES_PORT}
+  clusterIP: None
+  type: ClusterIP 

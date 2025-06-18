@@ -4,7 +4,7 @@ services:
     container_name: auw_web_postgres_db
     user: "999:999"
     env_file:
-      - .env
+      - ${ENV_FILE:-./envs/.env}
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
@@ -12,7 +12,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - /mnt/nas/storage/webchat/dev/pg_db:/var/lib/postgresql/data
+      - ${POSTGRES_DATA_DIR:-/mnt/nas/storage/webchat/db}:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-webcrawldb}"]
@@ -28,10 +28,9 @@ services:
     ports:
       - "${APP_PORT:-9012}:9012"
     volumes:
-      - ./logs:/app/logs
-      - /mnt/nas/storage/webchat/dev:/mnt/nas/storage/webchat/dev
+      - ${LOG_DIR:-./logs}:/app/logs
     env_file:
-      - .env
+      - ${ENV_FILE:-./envs/.env}
     depends_on:
       postgres:
         condition: service_healthy

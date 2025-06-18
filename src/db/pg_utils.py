@@ -4,7 +4,6 @@ from sqlalchemy import create_engine, text, Column, String, DateTime, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.exc import SQLAlchemyError
-from elasticsearch import AsyncElasticsearch, exceptions as es_exceptions
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from configs.config import Settings
@@ -41,7 +40,7 @@ SyncSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_eng
 
 def create_pg_tables():
     try:
-        Base.metadata.create_all(bind=sync_engine)
+        Base.metadata.create_all(bind=sync_engine, checkfirst=True)
         logger.info("PostgreSQL tables created successfully (if they didn't exist).")
     except SQLAlchemyError as e:
         logger.error(f"Error creating PostgreSQL tables: {e}")

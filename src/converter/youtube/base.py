@@ -1,6 +1,15 @@
 import re
-import datetime
+import asyncio
 from youtube_transcript_api import YouTubeTranscriptApi
+
+
+def format_time(seconds_float):
+    # 초를 반올림해서 정수로 변환
+    total_seconds = int(round(seconds_float))
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    secs = total_seconds % 60
+    return f"{hours:02}:{minutes:02}:{secs:02}"
 
 
 def regex_search(pattern: str, string: str, group: int) -> str:
@@ -46,20 +55,36 @@ def get_video_id(url: str) -> str:
 async def get_transcript(video_id: str) -> str:
     result = ""
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['ko', 'en', 'ja', 'zh-Hans'])
-        if transcript:
-            # 포맷 변경
-            result = "### Transcript\n"
-            for t in transcript:
-                start_time = str(datetime.timedelta(seconds=int(t['start'])))
-                end_time = str(datetime.timedelta(seconds=int(t['start'] + t['duration'])))
-                if start_time[0] == '2':
-                    break
-                result += f"[{start_time} - {end_time}]: {t['text']}\n"
-            return result
-        else:
-            result = "### Transcript\n No transcript found."
-            return result
-    except Exception as e:
-        result = "### Transcript\n No transcript found."
+        ytt_api = YouTubeTranscriptApi()
+        transcript_list = ytt_api.list(video_id)
+
+        try:
+            transcript = transcript_list.find_manually_created_transcript(['ko', 'en', 'ja', 'zh-Hans'])  
+            response = transcript.fetch()
+        except Exception as e:
+            try:
+                transcript = transcript_list.find_generated_transcript(['ko', 'en', 'ja', 'zh-Hans'])
+                response = transcript.fetch()
+            except Exception as e:
+                result = f"Error: {e}"
+                return result
+        
+        result = "### Transcript\n"
+        for chunk in response:
+            start_time = chunk.start
+            end_time = start_time + chunk.duration
+            text = chunk.text
+            
+            start_time_formatted = format_time(start_time)
+            end_time_formatted = format_time(end_time)
+            result += f"[{start_time_formatted} - {end_time_formatted}]: {text}\n"
         return result
+    except Exception as e:
+        result = f"Error: {e}"
+        return result
+
+
+if __name__ == "__main__":
+    import asyncio
+    video_id = get_video_id("https://www.youtube.com/watch?v=A1S19JzHN2M")
+    print(asyncio.run(get_transcript(video_id)))

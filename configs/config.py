@@ -11,7 +11,6 @@ class Settings(BaseSettings):
 
     APP_HOST: str = Field("0.0.0.0", env="APP_HOST")
     APP_PORT: int = Field(9004, env="APP_PORT")
-    VENDOR: str = Field("openai", env="VENDOR")
     SEMAPHORE_LIMIT: int = Field(300, env="SEMAPHORE_LIMIT")
     DB_DIR: str = Field("mnt/nas/storage", env="DB_DIR")
 
@@ -22,8 +21,8 @@ class Settings(BaseSettings):
 
     # Search
     SERPER_API_KEY: Optional[str] = Field(default=None, alias="serper_api_key")
-    NAVER_CLIENT_ID: Optional[str] = Field(default=None, alias="naver_client_id")
-    NAVER_CLIENT_SECRET: Optional[str] = Field(default=None, alias="naver_client_secret")
+    SERP_API_KEY: Optional[str] = Field(default=None, alias="serp_api_key")
+    BRAVE_API_KEY: Optional[str] = Field(default=None, alias="brave_api_key")
 
     # PostgreSQL
     POSTGRES_USER: str = Field("askyourwork", env="POSTGRES_USER")

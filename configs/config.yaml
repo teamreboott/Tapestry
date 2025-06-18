@@ -12,8 +12,46 @@ models:
 web_search:
   engine: serper
   num_output_per_query: 10
+  content_type_timeout: 0.25
   n_queries: 3
 
 db:
-  use_db_content: true
-  save_content_to_db: true
+  use_db_content: false
+  save_content_to_db: false
+
+exclude_domain: 
+  - "namu.wiki"
+  - "cio.com"
+  - "FileDown"
+  - "Download"
+  - "down"
+  - "lilys.ai"
+  - "facebook.com"
+  - "instagram.com"
+  - "twitter.com"
+  - "tiktok.com"
+
+domain_crawler:
+  news:
+    - "bbc.com"
+    - "chosun.com"
+    - "donga.com"
+    - "news.nate.com"
+    - "sedaily.com"
+    - "kmib.co.kr"
+    - "aitimes.com"
+    - "dongascience.com"
+    - "joongang.co.kr"
+    - "yna.co.kr"
+    - "dt.co.kr"
+    - "mt.co.kr"
+    - "news.sbs.co.kr"
+    - "ohmynews.com"
+  media:
+    - "youtube.com"
+    - "wikipedia.org"
+  blog:
+    - "blog.naver.com"
+    - "seo.goover.ai"
+    - "tistory.com"
+    - "brunch.co.kr"
