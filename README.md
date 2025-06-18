@@ -4,10 +4,6 @@
    </p>
 
 <p align="center">
-  English | <a href="README.ko.md">한국어</a>
-</p>
-
-<p align="center">
 🌐 Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
 </p>
 

@@ -1,7 +1,5 @@
 # Tapestry Test Clients & API Guide
 
-English | [한국어](README.ko.md)
-
 This document provides up-to-date information on the Tapestry API endpoints and how to use the provided test clients.
 
 ---
@@ -30,7 +28,7 @@ Main endpoint for web search-based QA.
 | └ `role`               | String  | Role (`user`, `assistant`)                                       | -         | Yes*     |
 | └ `content`            | String  | Message content                                                  | -         | Yes*     |
 
-\* Required if `messages` array is provided
+* Required if `messages` array is provided
 
 #### Response
 
@@ -82,5 +80,4 @@ curl http://127.0.0.1:9012/health
 ## 📁 Files
 
 - `client.py` : Example async client for API testing
-- `README.md` : (this file)
-- `README.ko.md` : Korean version 
+- `README.md` : (this file) 
