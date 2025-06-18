@@ -1,20 +1,18 @@
-# Tapestry API Guide
+# Tapestry Test Clients & API Guide
 
 English | [한국어](README.ko.md)
 
-This guide provides up-to-date information about the Tapestry API endpoints, request/response formats, and usage examples.
+This document provides up-to-date information on the Tapestry API endpoints and how to use the provided test clients.
 
 ---
 
-## API Endpoints
+## 📚 API Reference
 
-### Web Search API
-
-`POST /websearch`
+### `POST /websearch`
 
 Main endpoint for web search-based QA.
 
-#### Request Parameters
+#### Request Body
 
 | Name                   | Type    | Description                                                      | Default   | Required |
 |------------------------|---------|------------------------------------------------------------------|-----------|----------|
@@ -34,59 +32,46 @@ Main endpoint for web search-based QA.
 
 \* Required if `messages` array is provided
 
-#### Response Format
+#### Response
 
-The API returns a streaming response with the following status types:
+Streaming JSON lines with the following status types:
 
 - `processing`: Processing status updates
 - `streaming`: Streaming content chunks
 - `complete`: Final complete response
 - `failure`: Error messages
 
-Each line is a JSON object.
+---
 
-#### Example Usage (Python, Async)
+## 🧪 Test Client Usage
 
-```python
-import asyncio
-import aiohttp
-import json
+A sample client is provided for testing the API.
 
-async def request_web_search(query: str):
-    payload = {
-        "language": "ko",
-        "query": query,
-        "search_type": "auto",
-        "persona_prompt": "N/A",
-        "custom_prompt": "N/A",
-        "target_nuance": "Natural",
-        "messages": [],
-        "stream": True,
-        "use_youtube_transcript": False,
-        "top_k": None
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.post("http://127.0.0.1:9012/websearch", json=payload) as response:
-            async for line in response.content:
-                data = json.loads(line.decode("utf-8").strip())
-                if data["status"] == "streaming":
-                    print(data["delta"]["content"], end="")
-                elif data["status"] == "complete":
-                    print("\nComplete response received")
-                    break
+### Run the client
 
-asyncio.run(request_web_search("What is an AI search engine?"))
+```bash
+python client.py --query "What is an AI search engine?" --language en
 ```
+
+#### Options
+
+- `--query`: (Required) Search query string
+- `--language`: Search language (`en`, `ko`, etc.)
+- `--search_type`: Search type (`auto`, `general`, `news`, `scholar`, `youtube`)
+- `--persona_prompt`, `--custom_prompt`, `--target_nuance`, `--stream`, `--use_youtube_transcript`, `--top_k`, `--num_requests`: See `python client.py --help`
+
+#### Configure Endpoint
+
+Edit `SERVER_URL` in `client.py` to match your environment:
+
+- Docker/local: `http://127.0.0.1:9012/websearch`
+- Kubernetes: `http://127.0.0.1:30800/websearch`
 
 ---
 
-## Health Check API
+## 🩺 Health Check
 
 `GET /health`
-
-Simple health check endpoint to verify service status.
-
-#### Example
 
 ```bash
 curl http://127.0.0.1:9012/health
@@ -94,34 +79,8 @@ curl http://127.0.0.1:9012/health
 
 ---
 
-## Client Examples
+## 📁 Files
 
-Example clients are provided in the `service` directory:
-
-- `client_stream.py`: Example for using the streaming API
-- `client_sync.py`: Example for synchronous API usage
-
-To run the streaming client:
-
-```bash
-python client_stream.py --query "What is an AI search engine?" --language en
-```
-
-You can set the `SERVER_URL` in the client file according to your deployment:
-
-- Docker/local: `http://127.0.0.1:9012/websearch`
-- Kubernetes: `http://127.0.0.1:30800/websearch`
-
-For more options, run:
-
-```bash
-python client_stream.py --help
-```
-
----
-
-## Notes
-
-- The API supports both streaming and non-streaming responses.
-- For best results, use the streaming mode for interactive applications.
-- The `messages` parameter allows you to provide conversation history for context. 
+- `client.py` : Example async client for API testing
+- `README.md` : (this file)
+- `README.ko.md` : Korean version 

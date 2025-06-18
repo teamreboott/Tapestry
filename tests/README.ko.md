@@ -1,20 +1,18 @@
-# Tapestry API 가이드
+# Tapestry 테스트 클라이언트 & API 가이드
 
 [English](README.md) | 한국어
 
-이 가이드는 최신 Tapestry API 엔드포인트, 요청/응답 형식, 사용 예제에 대한 정보를 제공합니다.
+이 문서는 Tapestry API 엔드포인트와 제공되는 테스트 클라이언트 사용법을 안내합니다.
 
 ---
 
-## API 엔드포인트
+## 📚 API 레퍼런스
 
-### 웹 검색 API
-
-`POST /websearch`
+### `POST /websearch`
 
 웹 검색 기반 QA를 위한 메인 엔드포인트입니다.
 
-#### 요청 파라미터
+#### 요청 바디
 
 | 이름                    | 타입    | 설명                                                        | 기본값    | 필수    |
 |------------------------|---------|-------------------------------------------------------------|-----------|---------|
@@ -34,59 +32,45 @@
 
 \* `messages` 배열이 제공된 경우 필수
 
-#### 응답 형식
+#### 응답
 
-API는 다음과 같은 상태 타입의 스트리밍 응답을 반환합니다:
+아래와 같은 status 타입의 JSON 라인 스트리밍:
 
-- `processing`: 처리 상태 업데이트
-- `streaming`: 스트리밍 컨텐츠 청크
-- `complete`: 최종 완성된 응답
+- `processing`: 처리 상태
+- `streaming`: 스트리밍 응답
+- `complete`: 최종 응답
 - `failure`: 오류 메시지
-
-각 줄은 JSON 오브젝트입니다.
-
-#### 사용 예시 (Python, Async)
-
-```python
-import asyncio
-import aiohttp
-import json
-
-async def request_web_search(query: str):
-    payload = {
-        "language": "ko",
-        "query": query,
-        "search_type": "auto",
-        "persona_prompt": "N/A",
-        "custom_prompt": "N/A",
-        "target_nuance": "Natural",
-        "messages": [],
-        "stream": True,
-        "use_youtube_transcript": False,
-        "top_k": None
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.post("http://127.0.0.1:9012/websearch", json=payload) as response:
-            async for line in response.content:
-                data = json.loads(line.decode("utf-8").strip())
-                if data["status"] == "streaming":
-                    print(data["delta"]["content"], end="")
-                elif data["status"] == "complete":
-                    print("\n응답 완료")
-                    break
-
-asyncio.run(request_web_search("AI 검색 엔진이란?"))
-```
 
 ---
 
-## 헬스 체크 API
+## 🧪 테스트 클라이언트 사용법
+
+API 테스트용 샘플 클라이언트가 제공됩니다.
+
+### 클라이언트 실행
+
+```bash
+python client.py --query "AI 검색 엔진이란?" --language ko
+```
+
+#### 주요 옵션
+
+- `--query`: (필수) 검색 쿼리
+- `--language`: 검색 언어 (`en`, `ko` 등)
+- 기타 옵션은 `python client.py --help` 참고
+
+#### 엔드포인트 설정
+
+`client.py`의 `SERVER_URL`을 환경에 맞게 수정하세요.
+
+- Docker/로컬: `http://127.0.0.1:9012/websearch`
+- Kubernetes: `http://127.0.0.1:30800/websearch`
+
+---
+
+## 🩺 헬스 체크
 
 `GET /health`
-
-서비스 상태를 확인하기 위한 간단한 헬스 체크 엔드포인트입니다.
-
-#### 예시
 
 ```bash
 curl http://127.0.0.1:9012/health
@@ -94,34 +78,10 @@ curl http://127.0.0.1:9012/health
 
 ---
 
-## 클라이언트 예제
+## 📁 파일
 
-`service` 디렉토리에는 다음과 같은 예제 클라이언트가 포함되어 있습니다:
+- `client.py` : API 테스트용 비동기 클라이언트 예제
+- `README.md` : (영문)
+- `README.ko.md` : (이 파일)
 
-- `client_stream.py`: 스트리밍 API 사용 예제
-- `client_sync.py`: 동기식 API 사용 예제
-
-스트리밍 클라이언트를 실행하려면:
-
-```bash
-python client_stream.py --query "AI 검색 엔진이란?" --language ko
-```
-
-클라이언트 파일의 `SERVER_URL`을 배포 환경에 맞게 설정해야 합니다:
-
-- Docker/로컬: `http://127.0.0.1:9012/websearch`
-- Kubernetes: `http://127.0.0.1:30800/websearch`
-
-더 많은 옵션은 다음을 참고하세요:
-
-```bash
-python client_stream.py --help
-```
-
----
-
-## 참고
-
-- API는 스트리밍/비스트리밍 응답 모두 지원합니다.
-- 인터랙티브한 애플리케이션에는 스트리밍 모드를 권장합니다.
-- `messages` 파라미터로 대화 히스토리를 제공할 수 있습니다. 
+--- 
