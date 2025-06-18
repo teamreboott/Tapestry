@@ -220,7 +220,13 @@ You can test the API using the provided client script.
 
 ## 🎬 Demo
 
-[![유튜브 미리보기](https://img.youtube.com/vi/zQjk4DaSmqg/0.jpg)](https://youtu.be/zQjk4DaSmqg)
+You can watch the demo video directly below:
+
+<p align="center">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/zQjk4DaSmqg" frameborder="0" allowfullscreen></iframe>
+</p>
+
+[![YouTube Preview](https://img.youtube.com/vi/zQjk4DaSmqg/0.jpg)](https://youtu.be/zQjk4DaSmqg)
 
 ### Gradio
 
