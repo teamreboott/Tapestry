@@ -9,7 +9,7 @@ import os
 
 # --- Server URL Configuration ---
 SERVER_URL = os.environ.get("API_URL", "http://127.0.0.1:9012/websearch")
-GRADIO_PORT = int(os.environ.get("GRADIO_PORT", "80"))
+GRADIO_PORT = int(os.environ.get("GRADIO_PORT", "7860"))
 TIMEOUT = 180
 
 # --- Language Mapping ---
@@ -92,15 +92,26 @@ async def respond(
                                 bot_message = ""
                             bot_message += delta
                             chat_history[-1] = (message, bot_message)
-                        elif status == "complete":
-                            content = data_json.get("message", {}).get("content")
-                            if content:
-                                chat_history[-1] = (message, content)
-                            break
-                        elif status == "success":
-                            content = data_json.get("message", {}).get("content")
-                            if content:
-                                chat_history[-1] = (message, content)
+                        elif status == "complete" or status == "success":
+                            content = data_json.get("message", {}).get("content", "")
+                            # 언어별 안내 메시지
+                            lang_msg = {
+                                "en": "Sorry, no search results found.",
+                                "ko": "죄송합니다. 검색결과를 찾지 못했습니다.",
+                                "zh": "很抱歉，未找到搜索结果。",
+                                "ja": "申し訳ありませんが、検索結果が見つかりませんでした。"
+                            }
+                            msg = lang_msg.get(language, lang_msg["en"])
+                            if not content:
+                                content = msg
+                            chat_history[-1] = (message, content)
+                            # AI 응답 미리보기(앞 15글자만) 로그 출력, 예외 방지
+                            try:
+                                preview = content[:15] + ("..." if len(content) > 15 else "")
+                                rprint(Panel(preview, title="[bold blue]AI 응답 미리보기[/]", expand=False))
+                            except Exception as log_err:
+                                rprint(Panel(f"로그 출력 오류: {log_err}", title="[bold red]로그 오류[/]", expand=False))
+                            yield chat_history
                             break
                         elif status == "failure":
                             error_msg = data_json.get("message", "An error occurred while processing the request.")
@@ -552,6 +563,25 @@ css = """
     word-wrap: break-word !important;
     white-space: normal !important;
     overflow-wrap: break-word !important;
+}
+
+/* === 다크모드에서도 라이트처럼 휴지통/로고 테두리 제거 === */
+@media (prefers-color-scheme: dark) {
+    /* 휴지통 아이콘(Gradio SVG) */
+    svg[data-testid="delete"],
+    .gr-button svg[data-testid="delete"] {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        filter: none !important;
+    }
+    /* 로고(아바타) 원형 배경 */
+    #chatbot .avatar-container {
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+    }
 }
 """
 
@@ -1110,7 +1140,7 @@ with gr.Blocks(
         fn=handle_message_submit,
         inputs=[textbox, chatbot],
         outputs=[welcome_col, chatbot, textbox],
-        queue=False,
+        # queue=False,
         js=hide_and_pass_js
     ).then(
         fn=respond_wrapper, 
@@ -1123,7 +1153,7 @@ with gr.Blocks(
         fn=handle_message_submit,
         inputs=[textbox, chatbot],
         outputs=[welcome_col, chatbot, textbox],
-        queue=False,
+        # queue=False,
         js=hide_and_pass_js
     ).then(
         fn=respond_wrapper, 
@@ -1150,10 +1180,14 @@ with gr.Blocks(
         fn=on_new_chat, 
         inputs=None, 
         outputs=[chatbot, textbox, welcome_col, language_dropdown, search_type_dropdown, persona_prompt_tb, custom_prompt_tb, target_nuance_dropdown, stream_checkbox, youtube_checkbox, topk_slider], 
-        queue=False,
+        # queue=False,
         js=show_welcome_js
     )
 
 if __name__ == "__main__":
-    demo.queue()
+    # 큐 시스템 활성화 및 동시성 설정
+    demo.queue(
+        default_concurrency_limit=10,  # concurrency_count 대신
+        max_size=50           # 대기열 최대 크기
+    )
     demo.launch(share=False, server_name="0.0.0.0", server_port=GRADIO_PORT)

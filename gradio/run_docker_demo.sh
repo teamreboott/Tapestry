@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set default values
-GRADIO_PORT="${GRADIO_PORT:-80}"
+GRADIO_PORT="${GRADIO_PORT:-7860}"
 API_URL="${API_URL:-http://127.0.0.1:9012/websearch}"
 DOCKER_IMAGE="tapestry-gradio"
 CONTAINER_NAME="tapestry-gradio-demo"
