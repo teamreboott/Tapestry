@@ -1,7 +1,5 @@
 # Tapestry Gradio Web UI
 
-English | [한국어](README.ko.md)
-
 ## Introduction
 This project is a Gradio-based Web Search chatbot UI.
 

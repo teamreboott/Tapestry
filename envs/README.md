@@ -1,7 +1,5 @@
 # Environment Variable Guide
 
-English | [한국어](README.ko.md)
-
 All configuration for this project is managed via an environment variable file (`.env`). This approach allows for flexible and secure setup across different environments (local, Docker, Kubernetes).
 
 ---
