@@ -2,33 +2,35 @@
 
 [English](README.md) | 한국어
 
-이 가이드는 Tapestry API 엔드포인트와 사용 방법에 대한 정보를 제공합니다.
+이 가이드는 최신 Tapestry API 엔드포인트, 요청/응답 형식, 사용 예제에 대한 정보를 제공합니다.
 
 ---
 
 ## API 엔드포인트
 
 ### 웹 검색 API
+
 `POST /websearch`
 
 웹 검색 기반 QA를 위한 메인 엔드포인트입니다.
 
 #### 요청 파라미터
 
-| 이름 | 타입 | 설명 | 기본값 | 필수 |
-|------|------|-------------|---------|----------|
-| `query` | String | 검색 쿼리 | - | 예 |
-| `language` | String | 검색 언어 (`ko`, `en`, `zh`, `ja`) | `ko` | 아니오 |
-| `persona_prompt` | String | 페르소나 프롬프트 (필요없으면 `None`) | - | 아니오 |
-| `custom_prompt` | String | 커스텀 프롬프트 (필요없으면 `None`) | - | 아니오 |
-| `target_nuance` | String | 뉘앙스 (필요없으면 `None`) | - | 아니오 |
-| `return_process` | Boolean | 프로세스 메시지 반환 여부 | `true` | 아니오 |
-| `stream` | Boolean | 스트리밍 응답 반환 여부 | `true` | 아니오 |
-| `use_youtube_transcript` | Boolean | 유튜브 전사 포함 여부 | `true` | 아니오 |
-| `top_k` | Integer | 사용할 웹 컨텐츠 수 | `"auto"` | 아니오 |
-| `messages` | Array | 메시지 히스토리 (필요없으면 `[]`) | - | 아니오 |
-| └ `role` | String | 역할 (`user`, `assistant`) | - | 예* |
-| └ `content` | String | 메시지 내용 | - | 예* |
+| 이름                    | 타입    | 설명                                                        | 기본값    | 필수    |
+|------------------------|---------|-------------------------------------------------------------|-----------|---------|
+| `query`                | String  | 검색 쿼리                                                   | -         | 예      |
+| `language`             | String  | 검색 언어 (`ko`, `en`, `zh`, `ja`)                          | `ko`      | 아니오  |
+| `search_type`          | String  | 검색 타입 (`auto`, `general`, `scholar`, `news`, `youtube`) | `auto`    | 아니오  |
+| `persona_prompt`       | String  | 페르소나 프롬프트 (`N/A` 사용 시 미적용)                    | `N/A`     | 아니오  |
+| `custom_prompt`        | String  | 커스텀 프롬프트 (`N/A` 사용 시 미적용)                      | `N/A`     | 아니오  |
+| `target_nuance`        | String  | 목표 뉘앙스 (`Natural` 사용 시 기본)                        | `Natural` | 아니오  |
+| `return_process`       | Boolean | 프로세스 메시지 반환 여부                                   | `true`    | 아니오  |
+| `stream`               | Boolean | 스트리밍 응답 반환 여부                                     | `true`    | 아니오  |
+| `use_youtube_transcript`| Boolean| 유튜브 트랜스크립트 포함 여부                               | `false`   | 아니오  |
+| `top_k`                | Integer | 사용할 웹 컨텐츠 수 (`auto`는 자동)                         | `auto`    | 아니오  |
+| `messages`             | Array   | 메시지 히스토리 (필요 없으면 `[]`)                          | `[]`      | 아니오  |
+| └ `role`               | String  | 역할 (`user`, `assistant`)                                  | -         | 예*     |
+| └ `content`            | String  | 메시지 내용                                                 | -         | 예*     |
 
 \* `messages` 배열이 제공된 경우 필수
 
@@ -41,7 +43,9 @@ API는 다음과 같은 상태 타입의 스트리밍 응답을 반환합니다:
 - `complete`: 최종 완성된 응답
 - `failure`: 오류 메시지
 
-#### 사용 예시
+각 줄은 JSON 오브젝트입니다.
+
+#### 사용 예시 (Python, Async)
 
 ```python
 import asyncio
@@ -52,6 +56,7 @@ async def request_web_search(query: str):
     payload = {
         "language": "ko",
         "query": query,
+        "search_type": "auto",
         "persona_prompt": "N/A",
         "custom_prompt": "N/A",
         "target_nuance": "Natural",
@@ -60,9 +65,8 @@ async def request_web_search(query: str):
         "use_youtube_transcript": False,
         "top_k": None
     }
-    
     async with aiohttp.ClientSession() as session:
-        async with session.post("http://localhost:9012/websearch", json=payload) as response:
+        async with session.post("http://127.0.0.1:9012/websearch", json=payload) as response:
             async for line in response.content:
                 data = json.loads(line.decode("utf-8").strip())
                 if data["status"] == "streaming":
@@ -70,12 +74,23 @@ async def request_web_search(query: str):
                 elif data["status"] == "complete":
                     print("\n응답 완료")
                     break
+
+asyncio.run(request_web_search("AI 검색 엔진이란?"))
 ```
 
-### 헬스 체크 API
+---
+
+## 헬스 체크 API
+
 `GET /health`
 
 서비스 상태를 확인하기 위한 간단한 헬스 체크 엔드포인트입니다.
+
+#### 예시
+
+```bash
+curl http://127.0.0.1:9012/health
+```
 
 ---
 
@@ -89,9 +104,24 @@ async def request_web_search(query: str):
 스트리밍 클라이언트를 실행하려면:
 
 ```bash
-python client_stream.py
+python client_stream.py --query "AI 검색 엔진이란?" --language ko
 ```
 
 클라이언트 파일의 `SERVER_URL`을 배포 환경에 맞게 설정해야 합니다:
-- Docker: `http://127.0.0.1:9012/websearch`
-- Kubernetes: `http://127.0.0.1:30800/websearch` 
+
+- Docker/로컬: `http://127.0.0.1:9012/websearch`
+- Kubernetes: `http://127.0.0.1:30800/websearch`
+
+더 많은 옵션은 다음을 참고하세요:
+
+```bash
+python client_stream.py --help
+```
+
+---
+
+## 참고
+
+- API는 스트리밍/비스트리밍 응답 모두 지원합니다.
+- 인터랙티브한 애플리케이션에는 스트리밍 모드를 권장합니다.
+- `messages` 파라미터로 대화 히스토리를 제공할 수 있습니다. 
