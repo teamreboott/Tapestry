@@ -278,7 +278,7 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
             web_contents = await crawler.crawl(browser_client, scraped_sources[0])
             web_contents = [web_contents]
             url_content = web_contents[0]['content']
-            outline_prompt = prompts['outline_prompt'].format(query=query, content=url_content)
+            outline_prompt = prompts['outline_prompt'].format(query=query, content=url_content, target_language=target_language_name)
             outline_results = await get_outlines(outline_prompt)
             outlines = outline_results.get("outlines", [])
 
@@ -298,8 +298,6 @@ async def webchat(payload: Query) -> AsyncGenerator[str, None]:
         today_date = date_str
         sub_titles = str(outlines)
         prompt_web_search = json.dumps(web_contents)
-
-        console.print(f"[pink bold]WebSearch-Answer: {target_language_name} !!!!")
 
         answer_prompt = prompts['answer_prompt'].format(persona_prompt=persona_prompt, 
                                                         custom_prompt=custom_prompt, 

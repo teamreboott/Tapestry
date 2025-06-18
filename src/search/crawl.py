@@ -10,6 +10,7 @@ from src.converter.blog_extractors import BLOG_EXTRACTORS
 from src.converter.media_extractors import MEDIA_EXTRACTORS
 from src.converter.html_converter import HtmlConverter
 from src.db.pg_utils import get_document_from_pg
+from src.search.browser_utils import load_browser_client
 from structlog import get_logger
 from rich.console import Console
 
@@ -54,7 +55,7 @@ class Crawler:
         text = ""
         try:
             with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
-                # 최대 20페이지까지만 추출
+                # maximum 10 pages
                 max_pages = min(10, len(doc))
                 text = "".join(doc[i].get_text() for i in range(max_pages))
             return text
@@ -68,38 +69,26 @@ class Crawler:
         except Exception as e:
             return ""
 
-    def remove_surrogates(self, text: str) -> str:
-        """유니코드 서러게이트 문자를 효율적으로 제거"""
-        if not text:
-            return ""
-        
-        # encode/decode 방식으로 서러게이트 문자 처리 (for 루프보다 훨씬 빠름)
-        return text.encode('utf-8', 'ignore').decode('utf-8')
-
     async def _fetch_text(self, url: str, browser_client) -> str:
         """Download *url* and return decoded body text."""
         
         try:
-            # 1. 더 세밀한 타임아웃 설정 (연결 타임아웃과 읽기 타임아웃 분리)
+            # 1. set timeout
             timeout = httpx.Timeout(connect=0.5, read=0.8, write=0.3, pool=0.2)
             
-            # 2. 스트리밍 방식으로 데이터 받기 (메모리 효율성)
+            # 2. stream data
             async with browser_client.stream('GET', url, timeout=timeout) as response:
                 if response.status_code != 200:
                     return ""
                 
                 content_type = response.headers.get('content-type', '').lower()
                 content_length = response.headers.get('content-length')
-
-                if "arxiv.org/abs" in url:
-                    url = url.replace("/abs/", "/pdf/")
-                    content_type = "application/pdf"
                 
-                # 3. 콘텐츠 크기 사전 체크 (너무 큰 파일 차단)
+                # 3. check content size
                 if content_length and int(content_length) > 25 * 1024 * 1024:  # 25MB 제한
                     return ""
                 
-                # 4. 청크 단위로 읽으면서 크기 제한
+                # 4. read chunk by chunk
                 chunks = []
                 total_size = 0
                 max_size = 10 * 1024 * 1024  # 10MB 제한
@@ -112,22 +101,21 @@ class Crawler:
                 
                 content_bytes = b''.join(chunks)
                 
-                # 5. 콘텐츠 타입별 최적화된 처리
+                # 5. process by content type
                 if "application/pdf" in content_type:
-                    # PDF 처리를 별도 스레드에서 타임아웃으로 실행
                     return await asyncio.wait_for(
                         asyncio.to_thread(self.extract_pdf_text, content_bytes), 
                         timeout=1.5
                     )
                 elif "text/html" in content_type or "text/" in content_type:
-                    # HTML/텍스트 처리
+                    # HTML/text processing
                     try:
-                        # 6. 인코딩 자동 감지 및 처리
+                        # 6. auto detect encoding and process
                         text_content = content_bytes.decode('utf-8')
                     except UnicodeDecodeError:
-                        # UTF-8 실패시 다른 인코딩 시도
+                        # try other encoding if UTF-8 fails
                         import chardet
-                        detected = chardet.detect(content_bytes[:10000])  # 처음 10KB만 검사
+                        detected = chardet.detect(content_bytes[:10000])  # check first 10KB
                         encoding = detected.get('encoding', 'utf-8')
                         try:
                             text_content = content_bytes.decode(encoding, errors='ignore')
@@ -140,23 +128,21 @@ class Crawler:
                             timeout=0.5
                         )
                     else:
-                        # 일반 텍스트는 바로 반환 (크기 제한 적용)
+                        # return text directly (apply size limit)
                         return text_content[:self.max_content_length]
                 else:
                     return ""
                     
-        except asyncio.TimeoutError:
-            return ""
-        except httpx.HTTPStatusError:
-            return ""
-        except httpx.RequestError:
-            return ""
-        except Exception:
+        except Exception as e:
+            console.log(f"[red]{url}: {e}")
+            console.log("[red]****************")
             return ""
 
     async def crawl(self, browser_client, source):
 
         url = source['url']
+        if "arxiv.org/abs" in url:
+            url = url.replace("/abs/", "/pdf/")
         
         content = ""
         if self.use_db_content:
@@ -186,9 +172,9 @@ class Crawler:
                 content = f"Error: {type(e).__name__}" # 예외 유형도 포함
 
         source['content'] = content[:self.max_content_length]
-        console.log(f"[green]Crawler-Extract: {source['title']}")
-        console.log(f"[green]Crawler-Extract: {source['content'][:100]}")
-        console.log(f"[green]Crawler-Extract: {source['url']}")
+        console.log(f"[green]Crawler-Extract (title): {source['title']}")
+        console.log(f"[green]Crawler-Extract (content): {source['content'][:100]}")
+        console.log(f"[green]Crawler-Extract (url): {source['url']}")
         console.log(f"[green]--------------------------------")
         if len(source['content']) > 0:
             self.num_contents += 1
@@ -198,6 +184,7 @@ class Crawler:
 
     async def multiple_crawl(self, browser_client, sources):
         start_time = time.time()
+        # browser_client = load_browser_client()
         scraped_results = await asyncio.gather(*[self.crawl(browser_client, source) for source in sources])
         console.log(f"[pink bold]Crawler-Extract: {time.time() - start_time:.2f} seconds")
         console.print("[green]****************")
