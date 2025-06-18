@@ -220,7 +220,7 @@ You can test the API using the provided client script.
 
 ## 🎬 Demo
 
-TDB
+[![유튜브 미리보기](https://img.youtube.com/vi/zQjk4DaSmqg/0.jpg)](https://youtu.be/zQjk4DaSmqg)
 
 ### Gradio
 
