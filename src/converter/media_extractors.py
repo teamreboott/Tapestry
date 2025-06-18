@@ -1,5 +1,5 @@
 from . import ContentExtractor
-from .youtube.base import get_transcript, get_video_id, get_transcript_async
+from .youtube.base import get_transcript, get_video_id
 from .wiki.url2md_async import async_extract_wiki_content
 
 
