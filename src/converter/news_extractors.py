@@ -1,18 +1,18 @@
 from . import ContentExtractor
-from .chosun_news.url2md_async import async_extract_chosun_news_content
-from .donga_news.url2md_async import async_extract_donga_news_content
-from .nate_news.url2md_async import async_extract_nate_news_content
-from .sedaily_news.url2md_async import async_extract_sedaily_news_content
-from .kmib_news.url2md_async import async_extract_kmib_news_content
-from .aitimes_news.url2md_async import async_extract_aitimes_news_content
-from .dongascience_news.url2md_async import async_extract_dongascience_news_content
-from .joongang_news.url2md_async import async_extract_joongang_news_content
-from .yna_news.url2md_async import async_extract_yna_news_content
-from .dt_news.url2md_asnyc import async_extract_dt_news_content
-from .mt_news.url2md_async import async_extract_mt_news_content
-from .sbs_news.url2md_async import async_extract_sbs_news_content
-from .ohmynews_news.url2md_async import async_extract_ohmynews_content
-from .bbc_news.url2md_async import async_extract_bbc_news_content
+from .news.chosun_news.url2md_async import async_extract_chosun_news_content
+from .news.donga_news.url2md_async import async_extract_donga_news_content
+from .news.nate_news.url2md_async import async_extract_nate_news_content
+from .news.sedaily_news.url2md_async import async_extract_sedaily_news_content
+from .news.kmib_news.url2md_async import async_extract_kmib_news_content
+from .news.aitimes_news.url2md_async import async_extract_aitimes_news_content
+from .news.dongascience_news.url2md_async import async_extract_dongascience_news_content
+from .news.joongang_news.url2md_async import async_extract_joongang_news_content
+from .news.yna_news.url2md_async import async_extract_yna_news_content
+from .news.dt_news.url2md_asnyc import async_extract_dt_news_content
+from .news.mt_news.url2md_async import async_extract_mt_news_content
+from .news.sbs_news.url2md_async import async_extract_sbs_news_content
+from .news.ohmynews_news.url2md_async import async_extract_ohmynews_content
+from .news.bbc_news.url2md_async import async_extract_bbc_news_content
 
 
 class ChosunExtractor(ContentExtractor):

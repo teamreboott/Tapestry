@@ -1,8 +1,8 @@
 from . import ContentExtractor
-from .naver_blog.url2md_async import async_extract_naver_blog_content
-from .goover_blog.url2md_async import async_extract_goover_blog_content
-from .tistory_blog.url2md_async import async_extract_tistory_blog_content
-from .brunch_blog.url2md_async import async_extract_brunch_blog_content
+from .blogs.naver_blog.url2md_async import async_extract_naver_blog_content
+from .blogs.goover_blog.url2md_async import async_extract_goover_blog_content
+from .blogs.tistory_blog.url2md_async import async_extract_tistory_blog_content
+from .blogs.brunch_blog.url2md_async import async_extract_brunch_blog_content
 
 class NaverBlogExtractor(ContentExtractor):
     def can_handle(self, url: str) -> bool:

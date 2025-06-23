@@ -2,6 +2,7 @@ benchmark/simpleqa_results_gpt4.1/
 benchmark/simpleqa_results_claude3.7/
 mnt/
 storage/
+storage2/
 logs/
 envs/docker.env
 envs/k8s.env
