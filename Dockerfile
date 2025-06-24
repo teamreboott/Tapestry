@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM ubuntu:22.04
 
 # 기본 패키지 설치 (Ubuntu 22.04 호환성)
 RUN set -eux; \
