@@ -4,7 +4,7 @@
    </p>
 
 <p align="center">
-🌐 Open-Source Web Search Backend Framework via Plug-and-Play Knowledge Reconstruction
+🌐 Open-Source Web Search Backend Framework via Plug-and-Play Configuration
 </p>
 
 ---
