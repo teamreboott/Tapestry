@@ -1,7 +1,9 @@
-FROM ubuntu:22.04
+FROM python:3.12-slim
 
-# 기본 패키지 설치 (Ubuntu 22.04 호환성)
+# 기본 패키지 설치
 RUN set -eux; \
+    echo 'deb https://deb.debian.org/debian bookworm main' >  /etc/apt/sources.list ; \
+    echo 'deb https://deb.debian.org/debian-security bookworm-security main' >> /etc/apt/sources.list ; \
     apt-get update ; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     wget unzip curl \
