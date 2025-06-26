@@ -37,6 +37,7 @@ POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
 POSTGRES_DB="$POSTGRES_DB" \
 POSTGRES_DATA_DIR="$POSTGRES_DATA_DIR" \
 LOG_DIR="$LOG_DIR" \
+APP_PORT="$APP_PORT" \
 docker compose up --build -d
 
 echo "Setup completed successfully!"
