@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile
     container_name: auw_web_app
     ports:
-      - "${APP_PORT:-9012}:9012"
+      - "0.0.0.0:${APP_PORT:-9012}:${APP_PORT:-9012}"
     volumes:
       - ${LOG_DIR:-./logs}:/app/logs
     env_file:
